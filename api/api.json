@@ -1,0 +1,16 @@
+{
+    "invites": [
+        {
+            "id": 1,
+            "nom": "Mpete zacharie",
+            "portable": "0829225086",
+            "enregistrer": false
+        },
+        {
+            "id": 2,
+            "nom": "Mpete Blessing",
+            "portable": "0828435123",
+            "enregistrer": false
+        }
+    ]
+}

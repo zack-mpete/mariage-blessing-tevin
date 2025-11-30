@@ -1,0 +1,258 @@
+/* Styles spécifiques à la page du livre d'or */
+
+main {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: floralwhite;
+}
+
+.livre-dor {
+  background: linear-gradient(
+      rgba(254, 251, 251, 0.79),
+      rgba(246, 243, 243, 0.756)
+    ),
+    url("../assets/livreDor.jpg") center/cover no-repeat fixed;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 800px;
+  padding: 2rem;
+  border-top: 5px solid var(--red-color);
+}
+
+.livre-dor h1 {
+  font-size: 2.5rem;
+  color: var(--red-color);
+  text-align: center;
+  font-family: "Lucida Calligraphy", cursive;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.livre-dor h1::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background-color: var(--red-color);
+}
+
+.formulaire-avis {
+  width: 100%;
+  max-width: 600px;
+  padding: 2.5rem;
+  /* SUPPRIMER background: transparent; - C'était le problème principal */
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  /* Ajouter un fond légèrement différent pour bien voir les bordures */
+  background: transparent;
+  border: 1px solid rgba(108, 6, 6, 0.1);
+}
+
+.formulaire-avis h2 {
+  color: var(--red-color);
+  font-size: 1.8rem; /* Augmenté la taille */
+  text-align: center;
+  font-family: "Lucida Calligraphy", cursive;
+  font-weight: normal;
+  position: relative;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.formulaire-avis h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background-color: var(--red-color);
+}
+
+/* Styles des champs de formulaire - CORRIGÉ */
+.form-group {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--red-color);
+  font-weight: 600; /* Plus épais pour mieux voir */
+  font-size: 1.1rem;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--red-color); /* Épaissi la bordure */
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: "Times New Roman", Times, serif;
+  transition: all 0.3s ease;
+  background: rgba(132, 130, 130, 0.515);
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--red-color);
+  box-shadow: 0 0 0 3px rgba(108, 6, 6, 0.1); /* Ombre plus visible */
+  transform: translateY(-2px);
+}
+
+/* Style du bouton - AMÉLIORÉ */
+.btn-submit {
+  display: block;
+  background-color: var(--red-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Lucida Calligraphy", cursive;
+  margin: 1.5rem auto 0;
+  width: auto;
+  min-width: 200px;
+  text-align: center;
+  border: 2px solid transparent; /* Ajouté pour la cohérence */
+  color: var(--champagne);
+}
+
+.btn-submit:hover {
+  background-color: #5a0505;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--red-color);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+/* Messages d'erreur/validation */
+.form-group .error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.form-group.error .error-message {
+  display: block;
+}
+
+.form-group.error input,
+.form-group.error textarea {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Style pour les messages affichés */
+.messages {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+}
+
+.message {
+  background-color: white;
+  border-left: 4px solid var(--red-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  animation: fadeIn 0.5s ease;
+  border: 1px solid #f0f0f0; /* Ajouté pour mieux voir la bordure */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.message-author {
+  font-weight: bold;
+  color: var(--red-color);
+  font-size: 1.1rem;
+  font-family: "Lucida Calligraphy", cursive;
+}
+
+.message-date {
+  color: #666;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.message-content {
+  color: #333;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-size: 1.05rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .livre-dor {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .formulaire-avis {
+    padding: 1.5rem;
+  }
+
+  .livre-dor h1 {
+    font-size: 2rem;
+  }
+
+  .formulaire-avis h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .livre-dor {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .formulaire-avis {
+    padding: 1.25rem;
+  }
+
+  .btn-submit {
+    width: 100%;
+  }
+}

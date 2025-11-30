@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles/variables.css" />
+    <link rel="stylesheet" href="styles/style.css" />
+    <link rel="stylesheet" href="styles/reservation.css" />
+    <title>Réservation - Mariage Blessing & Tevin</title>
+  </head>
+  <body>
+    <header>
+      <span>B&T</span>
+      <nav>
+        <ul>
+          <li>
+            <a href="index.html">Accueil</a>
+          </li>
+          <li>
+            <a href="invitation.html">Invitation</a>
+          </li>
+          <li>
+            <a href="reservation.html">Reserver votre place</a>
+          </li>
+          <li>
+            <a href="galerie.html">Galerie</a>
+          </li>
+          <li>
+            <a href="livredor.html">Livredor</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="menuIcon">☰</div>
+    </header>
+    <main>
+      <div class="titre-page">Reserver votre place</div>
+      <section class="form">
+        <form id="reservation-form">
+          <!-- Message d'erreur -->
+          <div
+            id="error-message"
+            class="error-message"
+            style="display: none"
+          ></div>
+
+          <div class="form-group">
+            <label for="name">Nom & prénom *</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Votre nom et prénom"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="number">Numéro de téléphone *</label>
+            <input
+              type="tel"
+              id="number"
+              name="number"
+              placeholder="Ex: 0612345678"
+              pattern="[0-9]{10,}"
+              title="Veuillez entrer un numéro de téléphone valide (au moins 10 chiffres)"
+              required
+            />
+            <small
+              >Format: 10 chiffres minimum (sans espaces ni caractères
+              spéciaux)</small
+            >
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="submit-button" class="submit-btn">
+              <span class="button-text">Vérifier mon invitation</span>
+              <span
+                id="loading-indicator"
+                class="loading-indicator"
+                style="display: none"
+                >Chargement...</span
+              >
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <footer>© 2025 Mariage Blessing & Tevin</footer>
+    <script src="js/style.js"></script>
+    <script src="js/reservation.js"></script>
+  </body>
+</html>

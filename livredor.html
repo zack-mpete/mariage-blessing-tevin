@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles/variables.css" />
+    <link rel="stylesheet" href="styles/style.css" />
+    <link rel="stylesheet" href="styles/livredor.css" />
+    <title>Livre d'Or - Mariage Blessing & Tevin</title>
+  </head>
+  <body>
+    <header>
+      <span>B&T</span>
+      <nav>
+        <ul>
+          <li>
+            <a href="index.html">Accueil</a>
+          </li>
+          <li>
+            <a href="invitation.html">Invitation</a>
+          </li>
+          <li>
+            <a href="reservation.html">Reserver votre place</a>
+          </li>
+          <li>
+            <a href="galerie.html">Galerie</a>
+          </li>
+          <li>
+            <a href="livredor.html">Livre d'Or</a>
+          </li>
+        </ul>
+      </nav>
+      <div class="menuIcon">☰</div>
+    </header>
+    <main>
+      <section class="livre-dor">
+        <h1>Livre d'Or</h1>
+        <div class="messages">
+          <!-- Les messages du livre d'or seront affichés ici dynamiquement -->
+        </div>
+        <div class="formulaire-avis">
+          <h2>Laissez-nous un message</h2>
+          <form id="formAvis">
+            <div class="form-group">
+              <label for="nom">Votre nom</label>
+              <input type="text" id="nom" name="nom" required />
+            </div>
+            <div class="form-group">
+              <label for="message">Votre message</label>
+              <textarea
+                id="message"
+                name="message"
+                rows="4"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Publier</button>
+          </form>
+        </div>
+      </section>
+    </main>
+    <footer>copyright &copy; 2025 Blessing & Tevin</footer>
+    <script src="js/style.js"></script>
+    <script src="js/livredor.js"></script>
+  </body>
+</html>
