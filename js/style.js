@@ -53,3 +53,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+function createFallingHearts() {
+    const heartsContainer = document.getElementById("hearts-container");
+
+    function createHeart() {
+        const heart = document.createElement("div");
+        heart.className = "animHeart";
+        heart.innerHTML = "❤";
+
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.top = "-50px";
+
+        const size = 10 + Math.random() * 15;
+        heart.style.fontSize = size + "px";
+
+        const duration = 8 + Math.random() * 70;
+        heart.style.animationDuration = duration + "s";
+
+        heartsContainer.appendChild(heart);
+
+        setTimeout(() => {
+            heart.remove();
+        }, duration * 1000);
+    }
+
+    setInterval(createHeart, 800);
+
+    for (let i = 0; i < 10; i++) {
+        setTimeout(createHeart, i * 500);
+    }
+}
+
+// Initialisation au chargement de la page
+document.addEventListener("DOMContentLoaded", () => {
+    createFallingHearts();
+});
