@@ -27,6 +27,8 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  flex: 1;
+  min-width: 0; /* Permet aux éléments enfants de respecter la largeur du conteneur */
 }
 
 .left img,
@@ -37,8 +39,9 @@ h1 {
   object-fit: cover;
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  border: 3px solid var(--red-color); /* Bordure blanche pour plus de clarté */
+  border: 3px solid var(--red-color);
   margin: 10px 0;
+  max-width: 100%; /* S'assure que l'image ne dépasse pas de son conteneur */
 }
 
 .left img:hover,

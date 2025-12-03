@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nav.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
             menuIcon.appendChild = 'X';
+
         } else {
             document.body.style.overflow = '';
             menuIcon.appendChild = '☰';
