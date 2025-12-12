@@ -1,3 +1,4 @@
+/* Styles spécifiques pour la page d'invitation */
 * {
   margin: 0;
   padding: 0;
@@ -13,70 +14,641 @@ body {
   width: 100vw;
 }
 
-/* Styles spécifiques à la page d'invitation */
+/* Styles généraux */
 main {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-}
-
-.invit-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   width: 100%;
-  max-width: 600px;
-  text-align: center;
-  padding: 1rem;
 }
 
-.invit-page img {
-  max-width: 90%;
-  height: auto;
-  border-radius: 3px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.buttons {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.buttons button {
-  padding: 0.5rem 1rem;
-  color: var(--champagne);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-family: "lucida calligraphy";
-}
-.download-btn {
-  background-color: var(--red-color);
-}
-.print-btn {
-  background-color: #115400;
-  border: 1px solid #525400;
-}
-
-.print-btn:hover {
-  background-color: #6a6c00;
-  border: 1px solid #6a6c00;
-}
-
-.buttons button:hover {
-  background-color: #a0522d;
-}
 h1 {
   font-size: 2rem;
   color: var(--red-color);
   font-family: "Lucida Calligraphy", cursive;
   text-align: center;
   letter-spacing: 1px;
-  margin-top: 2rem;
-  margin-bottom: 0;
+  margin: 2rem 0 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+  text-align: center;
+  color: #8b0000;
+  margin: 0 0 30px;
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 15px;
+}
+
+/* Conteneur principal */
+.invit-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.invit-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #8b0000, #ffd700);
+}
+
+/* Conteneur du texte */
+.conteneur {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem;
+  margin: 0 0 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: floralwhite;
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+  .conteneur {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 2.5rem;
+  }
+}
+
+/* Texte de l'invitation */
+.texte {
+  flex: 1;
+  padding: 30px;
+  border: 5px solid var(--champagne);
+  border-radius: 10px;
+  font-family: "Lucida Calligraphy", cursive;
+  background: floralwhite;
+  line-height: 1.4;
+}
+
+.texte .p1 {
+  color: #333;
+  line-height: 1.1;
+  margin: 0 0 25px;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 0 10px;
+}
+
+.texte .p2 {
+  color: #333;
+  font-size: 1.1rem;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.texte .p2 .nom {
+  font-weight: bold;
+  text-transform: capitalize;
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.texte .p2 strong {
+  font-weight: bold;
+}
+
+.texte .date-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 30px 0 35px;
+  padding: 20px 0;
+  position: relative;
+}
+
+.texte .date-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b0000, transparent);
+}
+
+.texte .date-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b0000, transparent);
+}
+
+.texte .date {
+  font-size: 2.8em;
+  color: var(--champagne);
+  font-weight: bold;
+  text-align: center;
+  font-family: "Times New Roman", serif;
+  letter-spacing: 3px;
+  margin: 0;
+  border-top: 2px solid var(--champagne);
+  line-height: 1.2;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.separator {
+  color: var(--champagne);
+  font-weight: bold;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 2.2em;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  vertical-align: middle;
+  height: 5rem;
+}
+
+.heure-container {
+  margin: 25px 0 30px;
+  padding: 15px 0;
+  position: relative;
+}
+
+.heure-container::before {
+  content: "⏰";
+  display: block;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: #8b0000;
+}
+
+.heure {
+  font-size: 1.9em;
+  color: var(--champagne);
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  font-family: "Times New Roman", serif;
+  border-bottom: 2px solid var(--champagne);
+  margin-bottom: 20px;
+}
+.lieux span {
+  font-size: 1.4em;
+  color: var(--champagne);
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+  font-family: "Times New Roman", serif;
+}
+.lieux p {
+  margin: 0;
+  padding: 0;
+  font-size: 0.7rem;
+  color: var(--text-color);
+}
+.noms-couple {
+  display: flex;
+  flex-direction: column;
+  font-size: 8vw;
+  color: var(--champagne);
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  line-height: 1;
+  margin: 20px 0;
+}
+
+/* Message de bienvenue */
+#personalized-welcome {
+  text-align: center;
+  padding: 25px;
+  margin: 0 0 30px;
+  background: rgba(139, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 1.2em;
+  color: #8b0000;
+  display: none;
+  width: 100%;
+  border: 1px solid rgba(139, 0, 0, 0.2);
+}
+
+#welcome-title {
+  margin: 0 0 15px;
+  color: #8b0000;
+  font-size: 1.8em;
+}
+
+#welcome-message {
+  margin: 0;
+  font-size: 1.1em;
+}
+
+/* Informations de réservation */
+#reservation-info {
+  display: none;
+  margin: 35px 0 0;
+  padding: 25px;
+  background: rgba(139, 0, 0, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #8b0000;
+  border-right: 1px solid rgba(139, 0, 0, 0.1);
+  border-top: 1px solid rgba(139, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(139, 0, 0, 0.1);
+}
+
+#reservation-info h3 {
+  margin: 0 0 20px;
+  color: #8b0000;
+  font-size: 1.4em;
+  text-align: center;
+}
+
+#boissons-selectionnees {
+  margin: 15px 0;
+  font-size: 1.05em;
+  color: #333;
+  line-height: 1.7;
+  text-align: left;
+  padding: 0 15px;
+}
+
+.reservation-thanks {
+  margin: 20px 0 0;
+  font-size: 1em;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 10px 0 0;
+  border-top: 1px dashed rgba(139, 0, 0, 0.2);
+}
+
+/* Boutons */
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 30px 0 0;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (min-width: 576px) {
+  .buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+}
+
+.buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 260px;
+  text-align: center;
+  font-family: "Lucida Calligraphy", cursive;
+  margin: 0;
+}
+
+.download-btn {
+  background: linear-gradient(135deg, #8b0000, #a52a2a);
+  color: white;
+}
+
+.print-btn {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  color: white;
+}
+
+.share-btn {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+}
+
+.buttons button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.download-btn:hover {
+  background: linear-gradient(135deg, #a52a2a, #8b0000);
+}
+
+.print-btn:hover {
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+}
+
+.share-btn:hover {
+  background: linear-gradient(135deg, #128c7e, #25d366);
+}
+
+.buttons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 1.3em;
+}
+
+.btn-text {
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* Instructions */
+.instructions {
+  margin: 30px 0 0;
+  text-align: center;
+  color: #666;
+  font-size: 1em;
+  padding: 20px;
+  background: rgba(255, 215, 0, 0.07);
+  border-radius: 8px;
+  border-left: 4px solid #ffd700;
+  width: 100%;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.instructions p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Section retour */
+.back-section {
+  margin: 40px 0 0;
+  padding: 30px;
+  background: rgba(139, 0, 0, 0.05);
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+  border: 1px solid rgba(139, 0, 0, 0.1);
+}
+
+.back-section p {
+  color: #333;
+  margin: 0 0 25px;
+  font-size: 1.15em;
+  line-height: 1.7;
+}
+
+.back-link {
+  display: inline-block;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #8b0000, #a52a2a);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: "Lucida Calligraphy", cursive;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
+}
+
+.back-link:hover {
+  background: linear-gradient(135deg, #a52a2a, #8b0000);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(139, 0, 0, 0.3);
+}
+
+/* Footer spécifique */
+footer {
+  margin: 50px 0 0;
+  padding: 25px 20px;
+  text-align: center;
+  background: #8b0000;
+  color: white;
+  width: 100%;
+  border-top: 3px solid #ffd700;
+}
+
+footer p {
+  margin: 0 0 10px;
+}
+
+footer p:last-child {
+  margin: 0;
+}
+
+.footer-note {
+  font-size: 0.95em;
+  color: rgba(255, 255, 255, 0.85);
+  font-style: italic;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .conteneur {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.8rem;
+    margin: 0 0 25px;
+  }
+
+  .texte {
+    padding: 25px;
+    margin: 0;
+  }
+
+  .texte .date {
+    font-size: 2.4em;
+    margin: 12px 0;
+  }
+
+  .separator {
+    font-size: 1.9em;
+    margin: 0 8px;
+  }
+
+  .heure {
+    font-size: 1.7em;
+  }
+
+  .buttons button {
+    min-width: unset;
+    width: 100%;
+    max-width: 320px;
+    padding: 15px 25px;
+  }
+
+  .back-link {
+    width: 100%;
+    text-align: center;
+    padding: 13px 25px;
+  }
+}
+
+@media (max-width: 576px) {
+  h1 {
+    font-size: 1.9em;
+    margin: 1.5rem 0 0.8rem;
+  }
+
+  .page-title {
+    font-size: 2em;
+    margin: 0 0 25px;
+  }
+
+  .invit-page {
+    padding: 25px 20px;
+    margin: 15px auto;
+  }
+
+  .conteneur {
+    padding: 1.5rem;
+  }
+
+  .texte {
+    padding: 20px;
+  }
+
+  .texte .p1 {
+    font-size: 1.05rem;
+    margin: 0 0 20px;
+    line-height: 1.7;
+  }
+
+  .texte .p2 {
+    font-size: 1.05rem;
+    margin: 0 0 25px;
+    line-height: 1.7;
+  }
+
+  .texte .date {
+    font-size: 2em;
+    letter-spacing: 2px;
+  }
+
+  .separator {
+    font-size: 1.7em;
+    margin: 0 6px;
+  }
+
+  .heure {
+    font-size: 1.5em;
+  }
+
+  .buttons {
+    gap: 15px;
+  }
+
+  .buttons button {
+    padding: 14px 22px;
+    font-size: 1em;
+    min-width: 100%;
+  }
+
+  .btn-text {
+    font-size: 0.95em;
+  }
+
+  .instructions {
+    padding: 18px;
+    margin: 25px 0 0;
+  }
+
+  .back-section {
+    padding: 25px 20px;
+    margin: 35px 0 0;
+  }
+
+  .back-section p {
+    font-size: 1.1em;
+    margin: 0 0 20px;
+  }
+}
+
+/* Styles pour impression */
+@media print {
+  .buttons,
+  .instructions,
+  .back-section,
+  #personalized-welcome,
+  footer,
+  #reservation-info {
+    display: none !important;
+  }
+
+  .invit-page {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 0;
+  }
+
+  .conteneur {
+    box-shadow: none;
+    background: white;
+    padding: 1.5rem;
+    margin: 0;
+  }
+
+  .texte {
+    border: 3px solid #8b0000;
+    padding: 20px;
+  }
+
+  .texte .date {
+    color: #000;
+    text-shadow: none;
+  }
+
+  .separator {
+    color: #000;
+    text-shadow: none;
+  }
+
+  .heure {
+    color: #000;
+    text-shadow: none;
+  }
 }

@@ -15,18 +15,26 @@
       <span>B&T</span>
       <nav>
         <ul>
-          <li><a href="index.html">Accueil</a></li>
-          <li><a href="reservation.html">Réserver votre place</a></li>
-          <li><a href="galerie.html">Galerie</a></li>
-          <li><a href="livredor.html">Livre d'or</a></li>
+          <li>
+            <a href="index.html">Accueil</a>
+          </li>
+          <li>
+            <a href="reservation.html">Réserver votre place</a>
+          </li>
+          <li>
+            <a href="galerie.html">Galerie</a>
+          </li>
+          <li>
+            <a href="livredor.html">Livre d'or</a>
+          </li>
         </ul>
       </nav>
       <div class="menuIcon">☰</div>
     </header>
 
     <main>
-      <!-- Message de bienvenue personnalisé -->
-      <div id="personalized-welcome">
+      <!-- Message de bienvenue personnalisé (sera généré par JS) -->
+      <div id="personalized-welcome" style="display: none">
         <h2 id="welcome-title">🎉 Bienvenue ! 🎉</h2>
         <p id="welcome-message">
           Nous sommes ravis de vous accueillir sur votre invitation personnelle.
@@ -34,40 +42,55 @@
       </div>
 
       <!-- Contenu principal de l'invitation -->
-      <h1 class="page-title">Votre Invitation</h1>
+      <h1 class="page-title">Votre Invitation Personnelle</h1>
 
       <section class="invit-page">
         <section class="conteneur">
           <div class="texte">
-            <div class="p1">Nous nous marions.</div>
-            <div class="noms-couple">
-              <span>Blessing</span>
-              <span>&</span>
-              <span>Tevin</span>
-            </div>
-            <div class="p2">
-              Cher(e) <span class="nom" id="guest-name">Zack mpete</span>, nous
-              avons l'immense joie de vous convier à la célébration de notre
-              mariage le
-              <strong>samedi</strong>
-            </div>
-            <div class="date">27|12|2025</div>
-            <span class="separator">|</span>
-            <div class="heure">à 19H00</div>
-            <div class="lieux">
-              <span>Archevêché Size</span>
-              <p>
-                av. Kasavubu coin Ingénieur Ilunga, réf en diagonale du
-                gouvernorat de Lubumbashi.
-              </p>
-            </div>
+            <!-- Ici, le span avec class="nom" sera automatiquement rempli par JavaScript -->
 
-            <div id="reservation-info">
-              <h3>📋 Votre Réservation</h3>
-              <p id="boissons-selectionnees">
+            <p class="invitation-text">
+              Nous avons l'immense joie de vous convier à la célébration de
+              notre mariage le <strong>samedi 27 | 12 | 2025</strong> à
+              <strong>19h00</strong>.
+            </p>
+
+            <p class="location-text">
+              <strong>Lieu :</strong> À confirmer prochainement
+            </p>
+
+            <p class="message-text">
+              Ce jour si spécial ne serait pas complet sans votre présence. Nous
+              sommes impatients de partager ce moment de bonheur avec vous et de
+              créer ensemble des souvenirs inoubliables.
+            </p>
+
+            <p class="signature">
+              Avec toute notre affection,<br />
+              <span class="couple-names">Blessing & Tevin</span>
+            </p>
+
+            <!-- Informations supplémentaires personnalisées -->
+            <div
+              id="reservation-info"
+              style="
+                display: none;
+                margin-top: 20px;
+                padding: 15px;
+                background: rgba(139, 0, 0, 0.05);
+                border-radius: 8px;
+              "
+            >
+              <h3 style="margin-bottom: 10px; color: #8b0000">
+                📋 Votre Réservation
+              </h3>
+              <p
+                id="boissons-selectionnees"
+                style="margin: 5px 0; font-size: 0.95em"
+              >
                 <!-- Les boissons sélectionnées seront ajoutées ici par JavaScript -->
               </p>
-              <p class="reservation-thanks">
+              <p style="margin: 5px 0; font-size: 0.9em; color: #666">
                 <em>Merci pour vos préférences !</em>
               </p>
             </div>
@@ -86,7 +109,11 @@
             <span class="btn-text">Imprimer votre invitation</span>
           </button>
 
-          <button class="share-btn" id="share-btn">
+          <button
+            class="share-btn"
+            id="share-btn"
+            style="background: #25d366; color: white"
+          >
             <span class="btn-icon">📱</span>
             <span class="btn-text">Partager sur WhatsApp</span>
           </button>
@@ -94,7 +121,14 @@
 
         <!-- Instructions -->
         <div class="instructions">
-          <p>
+          <p
+            style="
+              text-align: center;
+              margin-top: 20px;
+              color: #666;
+              font-size: 0.9em;
+            "
+          >
             💝 <strong>Astuce :</strong> Téléchargez ou imprimez votre
             invitation pour la conserver en souvenir !
           </p>
@@ -102,11 +136,26 @@
       </section>
 
       <!-- Section retour au formulaire -->
-      <section class="back-section">
+      <section
+        class="back-section"
+        style="text-align: center; margin-top: 40px; padding: 20px"
+      >
         <p>
           Vous souhaitez modifier vos préférences ou inviter quelqu'un d'autre ?
         </p>
-        <a href="reservation.html" class="back-link">
+        <a
+          href="reservation.html"
+          class="back-link"
+          style="
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #8b0000;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+          "
+        >
           ⬅️ Retour au formulaire de réservation
         </a>
       </section>
@@ -122,15 +171,16 @@
 
     <!-- Script supplémentaire pour la personnalisation -->
     <script>
+      // Script pour gérer le bouton de partage WhatsApp
       document.addEventListener("DOMContentLoaded", function () {
         const shareBtn = document.getElementById("share-btn");
         if (shareBtn) {
           shareBtn.addEventListener("click", function () {
-            const guestName = document.querySelector(".nom").textContent;
+            const guestName = document.getElementById("guest-name").textContent;
             const message =
               `🎉 Je viens de recevoir mon invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
               `Je m'appelle ${guestName} et je suis invité(e) à leur célébration le 27 décembre 2025.\n\n` +
-              `💝 Rendez-vous sur le site pour réserver votre place !`;
+              `💝 Rendez-vous sur https://votresite.com pour réserver votre place !`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;

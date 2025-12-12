@@ -13,30 +13,31 @@
       <span>B&T</span>
       <nav>
         <ul>
-          <li>
-            <a href="index.html">Accueil</a>
-          </li>
-          <li>
-            <a href="reservation.html">Reserver votre place</a>
-          </li>
-          <li>
-            <a href="galerie.html">Galerie</a>
-          </li>
-          <li>
-            <a href="livredor.html">Livredor</a>
-          </li>
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="reservation.html">Reserver votre place</a></li>
+          <li><a href="galerie.html">Galerie</a></li>
+          <li><a href="livredor.html">Livre d'or</a></li>
         </ul>
       </nav>
       <div class="menuIcon">☰</div>
     </header>
+
     <main>
-      <div class="titre-page">Reserver votre place</div>
+      <div class="titre-page">Réserver votre place</div>
+
       <section class="form">
         <form id="reservation-form">
           <!-- Message d'erreur -->
           <div
             id="error-message"
             class="error-message"
+            style="display: none"
+          ></div>
+
+          <!-- Message de succès -->
+          <div
+            id="success-message"
+            class="success-message"
             style="display: none"
           ></div>
 
@@ -51,38 +52,49 @@
             />
           </div>
 
-          <div class="form-group">
-            <label for="number">Numéro de téléphone *</label>
-            <input
-              type="tel"
-              id="number"
-              name="number"
-              placeholder="Ex: 0612345678"
-              pattern="[0-9]{10,}"
-              title="Veuillez entrer un numéro de téléphone valide (au moins 10 chiffres)"
-              required
-            />
-            <small
-              >Format: 10 chiffres minimum (sans espaces ni caractères
-              spéciaux)</small
+          <!-- Section Préférences de boissons -->
+          <div class="preferences-section">
+            <h3 class="preferences-title">Vos préférences de boissons</h3>
+            <p class="preferences-subtitle">
+              Sélectionnez vos boissons préférées pour aider les mariés dans
+              l'organisation
+            </p>
+
+            <h4 class="category-title">🍷 Boissons alcoolisées</h4>
+            <div class="boissons-grid" id="alcool-grid">
+              <!-- Généré par JavaScript -->
+            </div>
+
+            <h4 class="category-title">🥤 Boissons non alcoolisées</h4>
+            <div class="boissons-grid" id="non-alcool-grid">
+              <!-- Généré par JavaScript -->
+            </div>
+
+            <!-- Résumé des sélections -->
+            <div
+              id="selection-summary"
+              class="selection-summary"
+              style="display: none"
             >
+              <!-- Généré par JavaScript -->
+            </div>
           </div>
 
-          <div class="form-actions">
-            <button type="submit" id="submit-button" class="submit-btn">
-              <span class="button-text">Vérifier mon invitation</span>
-              <span
-                id="loading-indicator"
-                class="loading-indicator"
-                style="display: none"
-                >Chargement...</span
-              >
-            </button>
-          </div>
+          <button type="submit" id="submit-button" class="submit-btn">
+            <span class="button-text">Confirmer la réservation</span>
+            <span
+              id="loading-indicator"
+              class="loading-indicator"
+              style="display: none"
+              >Chargement...</span
+            >
+          </button>
         </form>
       </section>
     </main>
+
     <footer>© 2025 Mariage Blessing & Tevin</footer>
+
     <script src="js/style.js"></script>
     <script src="js/reservation.js"></script>
   </body>
