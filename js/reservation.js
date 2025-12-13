@@ -20,7 +20,7 @@ const CONFIG = {
     WHATSAPP_TIMEOUT: 3000,
     REDIRECT_DELAY: 2000,
     HEARTS_INTERVAL: 400,
-    GOOGLE_SHEETS_API_URL: 'https://script.google.com/macros/s/AKfycbw6ySJLe-b2REIzkk5RhbWIfgThXsIi3ytAod9OuPxwL25UaIr-msD3ByLY701gh3Ml/exec'
+    GOOGLE_SHEETS_API_URL: 'https://script.google.com/macros/s/AKfycbx9iIsBuZsfohBIKIduqNkeWBBVWX8h8cYlTZh6cPK0F-AuoWeW6FMNWA9_kNSlmSo/exec'
 };
 
 // Gestionnaire de réservation avec Google Sheets
