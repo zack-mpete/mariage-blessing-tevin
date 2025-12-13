@@ -20,7 +20,7 @@ const CONFIG = {
     WHATSAPP_TIMEOUT: 3000,
     REDIRECT_DELAY: 2000,
     HEARTS_INTERVAL: 400,
-    GOOGLE_SHEETS_API_URL: 'https://script.google.com/macros/s/AKfycbwMNNS-dCEra3TNGILVdh3amZQWAEsMPhr2Km4AUNbaKZ8wl7ZKP-5T3VT1f6BjU9Gq/exec' // À remplacer par votre URL
+    GOOGLE_SHEETS_API_URL: 'https://script.google.com/macros/s/AKfycbw6ySJLe-b2REIzkk5RhbWIfgThXsIi3ytAod9OuPxwL25UaIr-msD3ByLY701gh3Ml/exec' // À remplacer par votre URL
 };
 
 // Gestionnaire de réservation avec Google Sheets
@@ -110,19 +110,29 @@ class ReservationManager {
         console.log('📡 Chargement des compteurs depuis Google Sheets...');
 
         try {
-            const response = await fetch(this.API_URL);
+            // CHANGEZ CETTE PARTIE : Utilisez POST au lieu de GET
+            const response = await fetch(this.API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'getAllCounts'
+                })
+            });
+
             const data = await response.json();
 
             if (data.success && data.counts) {
                 this.updateLocalCounts(data.counts);
-                console.log('✅ Compteurs Google Sheets chargés:', data.counts);
+                console.log('✅ Compteurs serveur chargés:', data.counts);
             } else {
-                throw new Error('Format de réponse invalide');
+                throw new Error(data.error || 'Format de réponse invalide');
             }
         } catch (error) {
             console.warn('⚠️ Impossible de contacter Google Sheets:', error);
 
-            // Essayer de charger depuis le cache local
+            // Fallback au cache local
             const cachedCounts = localStorage.getItem('cachedCounts');
             if (cachedCounts) {
                 this.updateLocalCounts(JSON.parse(cachedCounts));
@@ -133,7 +143,6 @@ class ReservationManager {
             this.showWarning('Mode hors-ligne - Les compteurs peuvent ne pas être à jour');
         }
     }
-
     // Mettre à jour les compteurs locaux avec les données du serveur
     updateLocalCounts(serverCounts) {
         this.boissonsData.alcool.forEach(boisson => {
@@ -198,240 +207,239 @@ class ReservationManager {
         }
     }
 
-    // Envoyer une réservation au serveur
-    async sendToServer(name, selectedBoissons) {
-        try {
-            const response = await fetch(this.API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'reserve',
-                    name: name,
-                    selectedBoissons: selectedBoissons,
-                    timestamp: new Date().toISOString()
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.updateLocalCounts(data.counts);
-                this.updateCountersDisplay();
-                return true;
-            } else {
-                throw new Error(data.error || 'Erreur serveur');
-            }
-        } catch (error) {
-            console.error('❌ Erreur envoi serveur:', error);
-            throw error;
-        }
-    }
-
-    // Sauvegarder une réservation en attente (mode hors-ligne)
-    savePendingReservation(name, selectedBoissons) {
-        const pending = JSON.parse(localStorage.getItem(this.pendingReservationsKey) || '[]');
-
-        pending.push({
+    // async sendToServer(name, selectedBoissons) {
+    try {
+    const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'reserve',
             name: name,
             selectedBoissons: selectedBoissons,
-            timestamp: new Date().toISOString(),
-            localTimestamp: Date.now()
-        });
+            timestamp: new Date().toISOString()
+        })
+    });
 
-        localStorage.setItem(this.pendingReservationsKey, JSON.stringify(pending));
+    const data = await response.json();
 
-        // Mettre à jour le badge
-        this.updatePendingReservationsBadge();
-
-        // Mettre à jour les compteurs locaux
-        selectedBoissons.forEach(boissonName => {
-            const boisson = [...this.boissonsData.alcool, ...this.boissonsData.nonAlcool]
-                .find(b => b.name === boissonName);
-            if (boisson) {
-                boisson.count++;
-            }
-        });
-
+    if (data.success) {
+        this.updateLocalCounts(data.counts);
         this.updateCountersDisplay();
+        return true;
+    } else {
+        throw new Error(data.error || 'Erreur serveur');
     }
+} catch (error) {
+    console.error('❌ Erreur envoi serveur:', error);
+    throw error;
+}
+}Sauvegarder une réservation en attente(mode hors - ligne)
+savePendingReservation(name, selectedBoissons) {
+    const pending = JSON.parse(localStorage.getItem(this.pendingReservationsKey) || '[]');
+
+    pending.push({
+        name: name,
+        selectedBoissons: selectedBoissons,
+        timestamp: new Date().toISOString(),
+        localTimestamp: Date.now()
+    });
+
+    localStorage.setItem(this.pendingReservationsKey, JSON.stringify(pending));
+
+    // Mettre à jour le badge
+    this.updatePendingReservationsBadge();
+
+    // Mettre à jour les compteurs locaux
+    selectedBoissons.forEach(boissonName => {
+        const boisson = [...this.boissonsData.alcool, ...this.boissonsData.nonAlcool]
+            .find(b => b.name === boissonName);
+        if (boisson) {
+            boisson.count++;
+        }
+    });
+
+    this.updateCountersDisplay();
+}
 
     // ========== WHATSAPP INTEGRATION ==========
 
     // Charger les compteurs WhatsApp en attente
     async loadPendingWhatsAppCounts() {
-        try {
-            const pendingData = localStorage.getItem(this.pendingWhatsAppCountsKey);
-            if (pendingData) {
-                this.pendingWhatsAppCounts = JSON.parse(pendingData);
-                console.log('📦 Compteurs WhatsApp en attente chargés:', this.pendingWhatsAppCounts);
-            } else {
-                this.pendingWhatsAppCounts = {};
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement compteurs WhatsApp:', error);
+    try {
+        const pendingData = localStorage.getItem(this.pendingWhatsAppCountsKey);
+        if (pendingData) {
+            this.pendingWhatsAppCounts = JSON.parse(pendingData);
+            console.log('📦 Compteurs WhatsApp en attente chargés:', this.pendingWhatsAppCounts);
+        } else {
             this.pendingWhatsAppCounts = {};
         }
+    } catch (error) {
+        console.error('❌ Erreur chargement compteurs WhatsApp:', error);
+        this.pendingWhatsAppCounts = {};
     }
+}
 
     // Sauvegarder les compteurs WhatsApp en attente
     async savePendingWhatsAppCounts() {
-        try {
-            localStorage.setItem(this.pendingWhatsAppCountsKey, JSON.stringify(this.pendingWhatsAppCounts));
-        } catch (error) {
-            console.error('❌ Erreur sauvegarde compteurs WhatsApp:', error);
-        }
+    try {
+        localStorage.setItem(this.pendingWhatsAppCountsKey, JSON.stringify(this.pendingWhatsAppCounts));
+    } catch (error) {
+        console.error('❌ Erreur sauvegarde compteurs WhatsApp:', error);
     }
+}
 
-    // Ajouter des compteurs WhatsApp en attente
-    addToPendingWhatsAppCounts(selectedBoissons) {
-        selectedBoissons.forEach(boissonName => {
-            this.pendingWhatsAppCounts[boissonName] = (this.pendingWhatsAppCounts[boissonName] || 0) + 1;
+// Ajouter des compteurs WhatsApp en attente
+addToPendingWhatsAppCounts(selectedBoissons) {
+    selectedBoissons.forEach(boissonName => {
+        this.pendingWhatsAppCounts[boissonName] = (this.pendingWhatsAppCounts[boissonName] || 0) + 1;
+    });
+
+    this.savePendingWhatsAppCounts();
+    console.log('➕ Ajouté aux compteurs WhatsApp en attente:', selectedBoissons);
+
+    // Mettre à jour le badge
+    this.updatePendingWhatsAppBadge();
+}
+
+// ========== INTERFACE METHODS ==========
+
+// Générer la grille des boissons avec compteurs
+generateBoissonsGrid() {
+    const alcoolGrid = document.getElementById('alcool-grid');
+    if (alcoolGrid) {
+        alcoolGrid.innerHTML = '';
+        this.boissonsData.alcool.forEach(boisson => {
+            alcoolGrid.appendChild(this.createBoissonItem(boisson, 'alcool'));
         });
-
-        this.savePendingWhatsAppCounts();
-        console.log('➕ Ajouté aux compteurs WhatsApp en attente:', selectedBoissons);
-
-        // Mettre à jour le badge
-        this.updatePendingWhatsAppBadge();
     }
 
-    // ========== INTERFACE METHODS ==========
+    const nonAlcoolGrid = document.getElementById('non-alcool-grid');
+    if (nonAlcoolGrid) {
+        nonAlcoolGrid.innerHTML = '';
+        this.boissonsData.nonAlcool.forEach(boisson => {
+            nonAlcoolGrid.appendChild(this.createBoissonItem(boisson, 'non-alcool'));
+        });
+    }
+}
 
-    // Générer la grille des boissons avec compteurs
-    generateBoissonsGrid() {
-        const alcoolGrid = document.getElementById('alcool-grid');
-        if (alcoolGrid) {
-            alcoolGrid.innerHTML = '';
-            this.boissonsData.alcool.forEach(boisson => {
-                alcoolGrid.appendChild(this.createBoissonItem(boisson, 'alcool'));
-            });
-        }
-
-        const nonAlcoolGrid = document.getElementById('non-alcool-grid');
-        if (nonAlcoolGrid) {
-            nonAlcoolGrid.innerHTML = '';
-            this.boissonsData.nonAlcool.forEach(boisson => {
-                nonAlcoolGrid.appendChild(this.createBoissonItem(boisson, 'non-alcool'));
-            });
-        }
+// Créer un élément boisson avec compteur
+createBoissonItem(boisson, type) {
+    let tooltip = '';
+    if (boisson.lastUpdated) {
+        const date = new Date(boisson.lastUpdated);
+        tooltip = `Dernière réservation: ${date.toLocaleString('fr-FR')}`;
     }
 
-    // Créer un élément boisson avec compteur
-    createBoissonItem(boisson, type) {
-        let tooltip = '';
-        if (boisson.lastUpdated) {
-            const date = new Date(boisson.lastUpdated);
-            tooltip = `Dernière réservation: ${date.toLocaleString('fr-FR')}`;
-        }
+    // Vérifier si cette boisson a des compteurs WhatsApp en attente
+    const pendingWhatsAppCount = this.pendingWhatsAppCounts[boisson.name] || 0;
 
-        // Vérifier si cette boisson a des compteurs WhatsApp en attente
-        const pendingWhatsAppCount = this.pendingWhatsAppCounts[boisson.name] || 0;
+    let displayText = `(${boisson.count}`;
+    if (pendingWhatsAppCount > 0) {
+        displayText += ` +${pendingWhatsAppCount} WhatsApp`;
+    }
+    displayText += `)`;
 
-        let displayText = `(${boisson.count}`;
-        if (pendingWhatsAppCount > 0) {
-            displayText += ` +${pendingWhatsAppCount} WhatsApp`;
-        }
-        displayText += `)`;
-
-        const item = document.createElement('div');
-        item.className = 'boisson-item';
-        item.setAttribute('data-type', type);
-        item.setAttribute('data-selected', 'false');
-        item.setAttribute('data-boisson', boisson.name);
-        item.innerHTML = `
+    const item = document.createElement('div');
+    item.className = 'boisson-item';
+    item.setAttribute('data-type', type);
+    item.setAttribute('data-selected', 'false');
+    item.setAttribute('data-boisson', boisson.name);
+    item.innerHTML = `
             <div class="boisson-checkbox"></div>
             <span class="boisson-name">${boisson.icon} ${boisson.name}</span>
             <span class="boisson-count" title="${tooltip}">${displayText}</span>
             <input type="checkbox" name="${type}" value="${boisson.name}" style="display: none;">
         `;
 
-        // Ajouter un indicateur visuel pour les compteurs en attente
-        if (pendingWhatsAppCount > 0) {
-            const countElement = item.querySelector('.boisson-count');
-            countElement.style.color = '#FF9800';
-            countElement.title += `\n${pendingWhatsAppCount} sélection(s) WhatsApp en attente`;
-        }
-
-        // Indiquer si c'est une valeur locale (hors-ligne)
-        if (boisson.count !== boisson.serverCount) {
-            const countElement = item.querySelector('.boisson-count');
-            countElement.style.color = '#FF9800';
-            countElement.title += `\n⚠️ Valeur locale (hors-ligne)`;
-        }
-
-        item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleBoissonSelection(item);
-        });
-
-        return item;
+    // Ajouter un indicateur visuel pour les compteurs en attente
+    if (pendingWhatsAppCount > 0) {
+        const countElement = item.querySelector('.boisson-count');
+        countElement.style.color = '#FF9800';
+        countElement.title += `\n${pendingWhatsAppCount} sélection(s) WhatsApp en attente`;
     }
 
-    // Basculer la sélection d'une boisson avec limite
-    toggleBoissonSelection(item) {
-        if (this.isSubmitting) {
-            console.log('⏸️ Soumission en cours, sélection désactivée');
-            return;
-        }
+    // Indiquer si c'est une valeur locale (hors-ligne)
+    if (boisson.count !== boisson.serverCount) {
+        const countElement = item.querySelector('.boisson-count');
+        countElement.style.color = '#FF9800';
+        countElement.title += `\n⚠️ Valeur locale (hors-ligne)`;
+    }
 
-        const checkbox = item.querySelector('input[type="checkbox"]');
-        const isCurrentlySelected = checkbox.checked;
+    item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleBoissonSelection(item);
+    });
 
-        // Si on essaie de désélectionner
-        if (isCurrentlySelected) {
-            checkbox.checked = false;
-            item.classList.remove('selected');
-            item.setAttribute('data-selected', 'false');
-            this.selectedCount = Math.max(0, this.selectedCount - 1);
-            this.updateSelectionCounter();
-            this.animateSelection(item, 'deselect');
-            this.updateSelectionSummary();
-            return;
-        }
+    return item;
+}
 
-        // Si on essaie de sélectionner mais que la limite est atteinte
-        if (this.selectedCount >= CONFIG.MAX_SELECTIONS) {
-            this.showAlert(MESSAGES.MAX_SELECTIONS_REACHED, 'warning');
-            this.animateSelection(item, 'warning');
-            return;
-        }
+// Basculer la sélection d'une boisson avec limite
+toggleBoissonSelection(item) {
+    if (this.isSubmitting) {
+        console.log('⏸️ Soumission en cours, sélection désactivée');
+        return;
+    }
 
-        // Sélectionner normalement
-        checkbox.checked = true;
-        item.classList.add('selected');
-        item.setAttribute('data-selected', 'true');
-        this.selectedCount++;
+    const checkbox = item.querySelector('input[type="checkbox"]');
+    const isCurrentlySelected = checkbox.checked;
+
+    // Si on essaie de désélectionner
+    if (isCurrentlySelected) {
+        checkbox.checked = false;
+        item.classList.remove('selected');
+        item.setAttribute('data-selected', 'false');
+        this.selectedCount = Math.max(0, this.selectedCount - 1);
         this.updateSelectionCounter();
-        this.animateSelection(item, 'select');
+        this.animateSelection(item, 'deselect');
         this.updateSelectionSummary();
+        return;
     }
 
-    // Animation de sélection
-    animateSelection(element, type) {
-        element.classList.add(`${type}-animation`);
-        setTimeout(() => {
-            element.classList.remove(`${type}-animation`);
-        }, 300);
+    // Si on essaie de sélectionner mais que la limite est atteinte
+    if (this.selectedCount >= CONFIG.MAX_SELECTIONS) {
+        this.showAlert(MESSAGES.MAX_SELECTIONS_REACHED, 'warning');
+        this.animateSelection(item, 'warning');
+        return;
     }
 
-    // Mettre à jour le compteur de sélections
-    updateSelectionCounter() {
-        const counterElement = document.getElementById('selection-counter');
-        if (counterElement) {
-            counterElement.textContent = `(${this.selectedCount}/${CONFIG.MAX_SELECTIONS})`;
-            counterElement.style.color = this.selectedCount >= CONFIG.MAX_SELECTIONS ? '#d32f2f' : '#2e7d32';
-        }
+    // Sélectionner normalement
+    checkbox.checked = true;
+    item.classList.add('selected');
+    item.setAttribute('data-selected', 'true');
+    this.selectedCount++;
+    this.updateSelectionCounter();
+    this.animateSelection(item, 'select');
+    this.updateSelectionSummary();
+}
+
+// Animation de sélection
+animateSelection(element, type) {
+    element.classList.add(`${type}-animation`);
+    setTimeout(() => {
+        element.classList.remove(`${type}-animation`);
+    }, 300);
+}
+
+// Mettre à jour le compteur de sélections
+updateSelectionCounter() {
+    const counterElement = document.getElementById('selection-counter');
+    if (counterElement) {
+        counterElement.textContent = `(${this.selectedCount}/${CONFIG.MAX_SELECTIONS})`;
+        counterElement.style.color = this.selectedCount >= CONFIG.MAX_SELECTIONS ? '#d32f2f' : '#2e7d32';
     }
+}
 
-    // Mettre à jour le résumé des sélections
-    updateSelectionSummary() {
-        const selectedItems = this.getSelectedBoissons();
-        const summaryElement = document.getElementById('selection-summary');
+// Mettre à jour le résumé des sélections
+updateSelectionSummary() {
+    const selectedItems = this.getSelectedBoissons();
+    const summaryElement = document.getElementById('selection-summary');
 
-        if (!summaryElement) return;
+    if (!summaryElement) return;
 
-        if (selectedItems.length > 0) {
-            summaryElement.innerHTML = `
+    if (selectedItems.length > 0) {
+        summaryElement.innerHTML = `
                 <div class="summary-title">
                     <strong>Vos sélections ${this.selectedCount}/${CONFIG.MAX_SELECTIONS}</strong>
                     <span id="selection-counter" style="color: ${this.selectedCount >= CONFIG.MAX_SELECTIONS ? '#d32f2f' : '#2e7d32'}; font-size: 0.9em; margin-left: 5px;">
@@ -440,22 +448,22 @@ class ReservationManager {
                 </div>
                 <div class="selection-list">
                     ${selectedItems.map(item => {
-                const boisson = [...this.boissonsData.alcool, ...this.boissonsData.nonAlcool]
-                    .find(b => b.name === item);
-                const count = boisson ? boisson.count : 0;
-                const serverCount = boisson ? boisson.serverCount : 0;
-                let displayText = `${item} <small>(${count}`;
-                if (count !== serverCount) {
-                    displayText += ` <span style="color: #FF9800">[hors-ligne]</span>`;
-                }
-                displayText += `)</small>`;
-                return `<span class="selection-tag">${displayText}</span>`;
-            }).join('')}
+            const boisson = [...this.boissonsData.alcool, ...this.boissonsData.nonAlcool]
+                .find(b => b.name === item);
+            const count = boisson ? boisson.count : 0;
+            const serverCount = boisson ? boisson.serverCount : 0;
+            let displayText = `${item} <small>(${count}`;
+            if (count !== serverCount) {
+                displayText += ` <span style="color: #FF9800">[hors-ligne]</span>`;
+            }
+            displayText += `)</small>`;
+            return `<span class="selection-tag">${displayText}</span>`;
+        }).join('')}
                 </div>
             `;
-            summaryElement.style.display = 'block';
-        } else {
-            summaryElement.innerHTML = `
+        summaryElement.style.display = 'block';
+    } else {
+        summaryElement.innerHTML = `
                 <div class="summary-title">
                     <strong>Vos sélections 0/${CONFIG.MAX_SELECTIONS}</strong>
                     <span id="selection-counter" style="color: #666; font-size: 0.9em; margin-left: 5px;">
@@ -466,178 +474,178 @@ class ReservationManager {
                     <span class="selection-tag empty">Aucune sélection</span>
                 </div>
             `;
-            summaryElement.style.display = 'block';
-        }
-
-        this.updateSelectionCounter();
+        summaryElement.style.display = 'block';
     }
 
-    // Récupérer les boissons sélectionnées
-    getSelectedBoissons() {
-        const alcool = Array.from(document.querySelectorAll('input[name="alcool"]:checked'))
-            .map(cb => cb.value);
-        const nonAlcool = Array.from(document.querySelectorAll('input[name="non-alcool"]:checked'))
-            .map(cb => cb.value);
-        return [...alcool, ...nonAlcool];
+    this.updateSelectionCounter();
+}
+
+// Récupérer les boissons sélectionnées
+getSelectedBoissons() {
+    const alcool = Array.from(document.querySelectorAll('input[name="alcool"]:checked'))
+        .map(cb => cb.value);
+    const nonAlcool = Array.from(document.querySelectorAll('input[name="non-alcool"]:checked'))
+        .map(cb => cb.value);
+    return [...alcool, ...nonAlcool];
+}
+
+// Configurer les écouteurs d'événements
+setupEventListeners() {
+    const form = document.getElementById('reservation-form');
+    if (form) {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if (this.isSubmitting) {
+                console.log('⏸️ Soumission déjà en cours');
+                return;
+            }
+
+            this.isSubmitting = true;
+
+            try {
+                await this.handleFormSubmit();
+            } catch (error) {
+                console.error('❌ Erreur lors de la soumission:', error);
+                this.showError('Une erreur est survenue. Veuillez réessayer.');
+            } finally {
+                setTimeout(() => {
+                    this.isSubmitting = false;
+                }, 1000);
+            }
+        });
     }
-
-    // Configurer les écouteurs d'événements
-    setupEventListeners() {
-        const form = document.getElementById('reservation-form');
-        if (form) {
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                if (this.isSubmitting) {
-                    console.log('⏸️ Soumission déjà en cours');
-                    return;
-                }
-
-                this.isSubmitting = true;
-
-                try {
-                    await this.handleFormSubmit();
-                } catch (error) {
-                    console.error('❌ Erreur lors de la soumission:', error);
-                    this.showError('Une erreur est survenue. Veuillez réessayer.');
-                } finally {
-                    setTimeout(() => {
-                        this.isSubmitting = false;
-                    }, 1000);
-                }
-            });
-        }
-    }
+}
 
     // ========== FORM SUBMISSION ==========
 
     // Gérer la soumission du formulaire
     async handleFormSubmit() {
-        const nameInput = document.getElementById('name');
-        const name = nameInput ? nameInput.value.trim() : '';
-        const selectedBoissons = this.getSelectedBoissons();
+    const nameInput = document.getElementById('name');
+    const name = nameInput ? nameInput.value.trim() : '';
+    const selectedBoissons = this.getSelectedBoissons();
 
-        console.log('📝 Soumission:', { nom: name, boissons: selectedBoissons });
+    console.log('📝 Soumission:', { nom: name, boissons: selectedBoissons });
 
-        // Validation
-        const validation = this.validateForm(name, selectedBoissons);
-        if (!validation.valid) {
-            this.showAlert(validation.message, 'error');
-            if (validation.field === 'name' && nameInput) nameInput.focus();
-            return;
-        }
-
-        // Sauvegarder les informations
-        const reservationData = {
-            nom: name,
-            boissons: selectedBoissons,
-            date: new Date().toISOString(),
-            timestamp: Date.now()
-        };
-
-        // Sauvegarder dans sessionStorage
-        sessionStorage.setItem('reservationData', JSON.stringify(reservationData));
-        localStorage.setItem('inviteName', name);
-        localStorage.setItem('selectedBoissons', JSON.stringify(selectedBoissons));
-
-        try {
-            // Gérer l'envoi à Google Sheets
-            if (this.isOnline) {
-                await this.sendToServer(name, selectedBoissons);
-                this.showSuccessWithWhatsAppButton(name, selectedBoissons);
-            } else {
-                // Mode hors-ligne
-                this.savePendingReservation(name, selectedBoissons);
-                this.showOfflineSuccess(name, selectedBoissons);
-            }
-
-            // Gérer WhatsApp
-            await this.handleWhatsAppNotification(name, selectedBoissons);
-
-            // Célébration et redirection
-            this.createCelebrationHearts();
-            setTimeout(() => {
-                window.location.href = ROUTES.INVITATION;
-            }, CONFIG.REDIRECT_DELAY);
-
-        } catch (error) {
-            console.error('❌ Erreur:', error);
-            this.showError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
-        }
+    // Validation
+    const validation = this.validateForm(name, selectedBoissons);
+    if (!validation.valid) {
+        this.showAlert(validation.message, 'error');
+        if (validation.field === 'name' && nameInput) nameInput.focus();
+        return;
     }
 
-    // Valider le formulaire
-    validateForm(name, selectedBoissons) {
-        if (!name || name.length < 2) {
-            return { valid: false, message: 'Veuillez entrer votre nom complet (minimum 2 caractères)', field: 'name' };
+    // Sauvegarder les informations
+    const reservationData = {
+        nom: name,
+        boissons: selectedBoissons,
+        date: new Date().toISOString(),
+        timestamp: Date.now()
+    };
+
+    // Sauvegarder dans sessionStorage
+    sessionStorage.setItem('reservationData', JSON.stringify(reservationData));
+    localStorage.setItem('inviteName', name);
+    localStorage.setItem('selectedBoissons', JSON.stringify(selectedBoissons));
+
+    try {
+        // Gérer l'envoi à Google Sheets
+        if (this.isOnline) {
+            await this.sendToServer(name, selectedBoissons);
+            this.showSuccessWithWhatsAppButton(name, selectedBoissons);
+        } else {
+            // Mode hors-ligne
+            this.savePendingReservation(name, selectedBoissons);
+            this.showOfflineSuccess(name, selectedBoissons);
         }
 
-        if (selectedBoissons.length === 0) {
-            return { valid: false, message: MESSAGES.MIN_SELECTIONS_REQUIRED, field: 'boissons' };
-        }
+        // Gérer WhatsApp
+        await this.handleWhatsAppNotification(name, selectedBoissons);
 
-        if (selectedBoissons.length > CONFIG.MAX_SELECTIONS) {
-            return { valid: false, message: MESSAGES.MAX_SELECTIONS_REACHED, field: 'boissons' };
-        }
+        // Célébration et redirection
+        this.createCelebrationHearts();
+        setTimeout(() => {
+            window.location.href = ROUTES.INVITATION;
+        }, CONFIG.REDIRECT_DELAY);
 
-        return { valid: true, message: '' };
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        this.showError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
     }
+}
+
+// Valider le formulaire
+validateForm(name, selectedBoissons) {
+    if (!name || name.length < 2) {
+        return { valid: false, message: 'Veuillez entrer votre nom complet (minimum 2 caractères)', field: 'name' };
+    }
+
+    if (selectedBoissons.length === 0) {
+        return { valid: false, message: MESSAGES.MIN_SELECTIONS_REQUIRED, field: 'boissons' };
+    }
+
+    if (selectedBoissons.length > CONFIG.MAX_SELECTIONS) {
+        return { valid: false, message: MESSAGES.MAX_SELECTIONS_REACHED, field: 'boissons' };
+    }
+
+    return { valid: true, message: '' };
+}
 
     // ========== WHATSAPP NOTIFICATION ==========
 
     // Gestion des notifications WhatsApp
     async handleWhatsAppNotification(name, selectedBoissons) {
-        try {
-            console.log('📱 Début gestion WhatsApp...');
+    try {
+        console.log('📱 Début gestion WhatsApp...');
 
-            // Ajouter aux compteurs WhatsApp en attente
-            this.addToPendingWhatsAppCounts(selectedBoissons);
+        // Ajouter aux compteurs WhatsApp en attente
+        this.addToPendingWhatsAppCounts(selectedBoissons);
 
-            // Préparer le message
-            const message = this.formatWhatsAppMessage(name, selectedBoissons);
+        // Préparer le message
+        const message = this.formatWhatsAppMessage(name, selectedBoissons);
 
-            // Essayer d'envoyer
-            const sent = await this.sendWhatsAppMessage(message);
+        // Essayer d'envoyer
+        const sent = await this.sendWhatsAppMessage(message);
 
-            if (sent) {
-                console.log('✅ WhatsApp envoyé avec succès');
-                // Retirer des compteurs en attente
-                selectedBoissons.forEach(boisson => {
-                    if (this.pendingWhatsAppCounts[boisson] && this.pendingWhatsAppCounts[boisson] > 0) {
-                        this.pendingWhatsAppCounts[boisson]--;
-                        if (this.pendingWhatsAppCounts[boisson] <= 0) {
-                            delete this.pendingWhatsAppCounts[boisson];
-                        }
+        if (sent) {
+            console.log('✅ WhatsApp envoyé avec succès');
+            // Retirer des compteurs en attente
+            selectedBoissons.forEach(boisson => {
+                if (this.pendingWhatsAppCounts[boisson] && this.pendingWhatsAppCounts[boisson] > 0) {
+                    this.pendingWhatsAppCounts[boisson]--;
+                    if (this.pendingWhatsAppCounts[boisson] <= 0) {
+                        delete this.pendingWhatsAppCounts[boisson];
                     }
-                });
-                this.savePendingWhatsAppCounts();
-                this.updatePendingWhatsAppBadge();
-            }
-
-        } catch (error) {
-            console.error('❌ Erreur gestion WhatsApp:', error);
+                }
+            });
+            this.savePendingWhatsAppCounts();
+            this.updatePendingWhatsAppBadge();
         }
+
+    } catch (error) {
+        console.error('❌ Erreur gestion WhatsApp:', error);
     }
+}
 
-    // Formater message WhatsApp
-    formatWhatsAppMessage(name, selectedBoissons) {
-        const date = new Date().toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+// Formater message WhatsApp
+formatWhatsAppMessage(name, selectedBoissons) {
+    const date = new Date().toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 
-        // Récupérer les compteurs actuels
-        const countsText = selectedBoissons.map(b => {
-            const boisson = [...this.boissonsData.alcool, ...this.boissonsData.nonAlcool]
-                .find(item => item.name === b);
-            const count = boisson ? boisson.count : 0;
-            return `• ${b}: ${count} personne${count > 1 ? 's' : ''}`;
-        }).join('\n');
+    // Récupérer les compteurs actuels
+    const countsText = selectedBoissons.map(b => {
+        const boisson = [...this.boissonsData.alcool, ...this.boissonsData.nonAlcool]
+            .find(item => item.name === b);
+        const count = boisson ? boisson.count : 0;
+        return `• ${b}: ${count} personne${count > 1 ? 's' : ''}`;
+    }).join('\n');
 
-        return `
+    return `
 🎉 NOUVELLE RÉSERVATION DE BOISSONS 🎉
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -657,142 +665,142 @@ ${this.isOnline ? '✅ En ligne - Synchronisé' : '⚠️ Hors-ligne - Synchroni
 💝 Merci pour votre participation !
 Blessing & Tevin ❤️
         `.trim();
-    }
+}
 
     // Envoyer un message WhatsApp
     async sendWhatsAppMessage(message) {
-        if (!message) return false;
+    if (!message) return false;
 
-        const cleanNumber = this.whatsappNumber.replace(/\D/g, '');
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
+    const cleanNumber = this.whatsappNumber.replace(/\D/g, '');
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
 
-        return new Promise((resolve) => {
-            try {
-                const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    return new Promise((resolve) => {
+        try {
+            const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 
-                if (newWindow) {
-                    setTimeout(() => {
-                        try {
-                            if (newWindow && !newWindow.closed) {
-                                newWindow.close();
-                            }
-                        } catch (e) { }
-                    }, 2000);
-                    resolve(true);
-                } else {
-                    // Fallback avec iframe
-                    const iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;';
-                    iframe.src = whatsappUrl;
-                    document.body.appendChild(iframe);
-
-                    setTimeout(() => {
-                        if (iframe.parentNode) {
-                            iframe.parentNode.removeChild(iframe);
+            if (newWindow) {
+                setTimeout(() => {
+                    try {
+                        if (newWindow && !newWindow.closed) {
+                            newWindow.close();
                         }
-                        resolve(true);
-                    }, 500);
-                }
-            } catch (error) {
-                console.error('❌ Erreur envoi WhatsApp:', error);
-                resolve(false);
+                    } catch (e) { }
+                }, 2000);
+                resolve(true);
+            } else {
+                // Fallback avec iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;';
+                iframe.src = whatsappUrl;
+                document.body.appendChild(iframe);
+
+                setTimeout(() => {
+                    if (iframe.parentNode) {
+                        iframe.parentNode.removeChild(iframe);
+                    }
+                    resolve(true);
+                }, 500);
             }
-        });
-    }
+        } catch (error) {
+            console.error('❌ Erreur envoi WhatsApp:', error);
+            resolve(false);
+        }
+    });
+}
 
-    // ========== UI UPDATES ==========
+// ========== UI UPDATES ==========
 
-    // Mettre à jour l'affichage des compteurs
-    updateCountersDisplay() {
-        // Mettre à jour les compteurs alcool
-        this.boissonsData.alcool.forEach(boisson => {
-            const item = document.querySelector(`[data-boisson="${boisson.name}"]`);
-            if (item) {
-                const countElement = item.querySelector('.boisson-count');
-                if (countElement) {
-                    const pendingWhatsAppCount = this.pendingWhatsAppCounts[boisson.name] || 0;
-                    let displayText = `(${boisson.count}`;
-                    if (pendingWhatsAppCount > 0) {
-                        displayText += ` +${pendingWhatsAppCount} WhatsApp`;
-                    }
-                    displayText += `)`;
-                    countElement.textContent = displayText;
-
-                    // Mettre à jour le style
-                    let title = '';
-                    if (boisson.lastUpdated) {
-                        const date = new Date(boisson.lastUpdated);
-                        title = `Dernière réservation: ${date.toLocaleString('fr-FR')}`;
-                    }
-
-                    if (pendingWhatsAppCount > 0) {
-                        countElement.style.color = '#FF9800';
-                        title += `\n${pendingWhatsAppCount} sélection(s) WhatsApp en attente`;
-                    }
-
-                    if (boisson.count !== boisson.serverCount) {
-                        countElement.style.color = '#FF9800';
-                        title += `\n⚠️ Valeur locale (hors-ligne)`;
-                    }
-
-                    countElement.title = title;
+// Mettre à jour l'affichage des compteurs
+updateCountersDisplay() {
+    // Mettre à jour les compteurs alcool
+    this.boissonsData.alcool.forEach(boisson => {
+        const item = document.querySelector(`[data-boisson="${boisson.name}"]`);
+        if (item) {
+            const countElement = item.querySelector('.boisson-count');
+            if (countElement) {
+                const pendingWhatsAppCount = this.pendingWhatsAppCounts[boisson.name] || 0;
+                let displayText = `(${boisson.count}`;
+                if (pendingWhatsAppCount > 0) {
+                    displayText += ` +${pendingWhatsAppCount} WhatsApp`;
                 }
-            }
-        });
+                displayText += `)`;
+                countElement.textContent = displayText;
 
-        // Mettre à jour les compteurs non-alcool
-        this.boissonsData.nonAlcool.forEach(boisson => {
-            const item = document.querySelector(`[data-boisson="${boisson.name}"]`);
-            if (item) {
-                const countElement = item.querySelector('.boisson-count');
-                if (countElement) {
-                    const pendingWhatsAppCount = this.pendingWhatsAppCounts[boisson.name] || 0;
-                    let displayText = `(${boisson.count}`;
-                    if (pendingWhatsAppCount > 0) {
-                        displayText += ` +${pendingWhatsAppCount} WhatsApp`;
-                    }
-                    displayText += `)`;
-                    countElement.textContent = displayText;
-
-                    let title = '';
-                    if (boisson.lastUpdated) {
-                        const date = new Date(boisson.lastUpdated);
-                        title = `Dernière réservation: ${date.toLocaleString('fr-FR')}`;
-                    }
-
-                    if (pendingWhatsAppCount > 0) {
-                        countElement.style.color = '#FF9800';
-                        title += `\n${pendingWhatsAppCount} sélection(s) WhatsApp en attente`;
-                    }
-
-                    if (boisson.count !== boisson.serverCount) {
-                        countElement.style.color = '#FF9800';
-                        title += `\n⚠️ Valeur locale (hors-ligne)`;
-                    }
-
-                    countElement.title = title;
+                // Mettre à jour le style
+                let title = '';
+                if (boisson.lastUpdated) {
+                    const date = new Date(boisson.lastUpdated);
+                    title = `Dernière réservation: ${date.toLocaleString('fr-FR')}`;
                 }
+
+                if (pendingWhatsAppCount > 0) {
+                    countElement.style.color = '#FF9800';
+                    title += `\n${pendingWhatsAppCount} sélection(s) WhatsApp en attente`;
+                }
+
+                if (boisson.count !== boisson.serverCount) {
+                    countElement.style.color = '#FF9800';
+                    title += `\n⚠️ Valeur locale (hors-ligne)`;
+                }
+
+                countElement.title = title;
             }
-        });
+        }
+    });
 
-        // Mettre à jour les badges
-        this.updatePendingReservationsBadge();
-        this.updatePendingWhatsAppBadge();
-    }
+    // Mettre à jour les compteurs non-alcool
+    this.boissonsData.nonAlcool.forEach(boisson => {
+        const item = document.querySelector(`[data-boisson="${boisson.name}"]`);
+        if (item) {
+            const countElement = item.querySelector('.boisson-count');
+            if (countElement) {
+                const pendingWhatsAppCount = this.pendingWhatsAppCounts[boisson.name] || 0;
+                let displayText = `(${boisson.count}`;
+                if (pendingWhatsAppCount > 0) {
+                    displayText += ` +${pendingWhatsAppCount} WhatsApp`;
+                }
+                displayText += `)`;
+                countElement.textContent = displayText;
 
-    // ========== BADGES ==========
+                let title = '';
+                if (boisson.lastUpdated) {
+                    const date = new Date(boisson.lastUpdated);
+                    title = `Dernière réservation: ${date.toLocaleString('fr-FR')}`;
+                }
 
-    // Mettre à jour le badge des réservations en attente
-    updatePendingReservationsBadge() {
-        const pending = JSON.parse(localStorage.getItem(this.pendingReservationsKey) || '[]');
-        const totalPending = pending.length;
+                if (pendingWhatsAppCount > 0) {
+                    countElement.style.color = '#FF9800';
+                    title += `\n${pendingWhatsAppCount} sélection(s) WhatsApp en attente`;
+                }
 
-        let badge = document.getElementById('pending-reservations-badge');
-        if (!badge && totalPending > 0) {
-            badge = document.createElement('div');
-            badge.id = 'pending-reservations-badge';
-            badge.style.cssText = `
+                if (boisson.count !== boisson.serverCount) {
+                    countElement.style.color = '#FF9800';
+                    title += `\n⚠️ Valeur locale (hors-ligne)`;
+                }
+
+                countElement.title = title;
+            }
+        }
+    });
+
+    // Mettre à jour les badges
+    this.updatePendingReservationsBadge();
+    this.updatePendingWhatsAppBadge();
+}
+
+// ========== BADGES ==========
+
+// Mettre à jour le badge des réservations en attente
+updatePendingReservationsBadge() {
+    const pending = JSON.parse(localStorage.getItem(this.pendingReservationsKey) || '[]');
+    const totalPending = pending.length;
+
+    let badge = document.getElementById('pending-reservations-badge');
+    if (!badge && totalPending > 0) {
+        badge = document.createElement('div');
+        badge.id = 'pending-reservations-badge';
+        badge.style.cssText = `
                 position: fixed;
                 bottom: 20px;
                 left: 20px;
@@ -811,12 +819,12 @@ Blessing & Tevin ❤️
                 border: 2px solid white;
                 cursor: help;
             `;
-            document.body.appendChild(badge);
-        }
+        document.body.appendChild(badge);
+    }
 
-        if (badge) {
-            if (totalPending > 0) {
-                badge.innerHTML = `
+    if (badge) {
+        if (totalPending > 0) {
+            badge.innerHTML = `
                     <span>📊</span>
                     <span>${totalPending} réservations en attente</span>
                     <button onclick="window.reservationManager.syncPendingReservations()" 
@@ -827,23 +835,23 @@ Blessing & Tevin ❤️
                         🔄
                     </button>
                 `;
-                badge.title = `${totalPending} réservation(s) en attente de synchronisation avec Google Sheets`;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
+            badge.title = `${totalPending} réservation(s) en attente de synchronisation avec Google Sheets`;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
         }
     }
+}
 
-    // Mettre à jour le badge WhatsApp
-    updatePendingWhatsAppBadge() {
-        const totalPending = Object.values(this.pendingWhatsAppCounts).reduce((a, b) => a + b, 0);
+// Mettre à jour le badge WhatsApp
+updatePendingWhatsAppBadge() {
+    const totalPending = Object.values(this.pendingWhatsAppCounts).reduce((a, b) => a + b, 0);
 
-        let badge = document.getElementById('pending-whatsapp-badge');
-        if (!badge && totalPending > 0) {
-            badge = document.createElement('div');
-            badge.id = 'pending-whatsapp-badge';
-            badge.style.cssText = `
+    let badge = document.getElementById('pending-whatsapp-badge');
+    if (!badge && totalPending > 0) {
+        badge = document.createElement('div');
+        badge.id = 'pending-whatsapp-badge';
+        badge.style.cssText = `
                 position: fixed;
                 bottom: 80px;
                 left: 20px;
@@ -862,12 +870,12 @@ Blessing & Tevin ❤️
                 border: 2px solid white;
                 cursor: help;
             `;
-            document.body.appendChild(badge);
-        }
+        document.body.appendChild(badge);
+    }
 
-        if (badge) {
-            if (totalPending > 0) {
-                badge.innerHTML = `
+    if (badge) {
+        if (totalPending > 0) {
+            badge.innerHTML = `
                     <span>📱</span>
                     <span>${totalPending} WhatsApp en attente</span>
                     <button onclick="window.reservationManager.forceSendWhatsAppCounts()" 
@@ -878,61 +886,61 @@ Blessing & Tevin ❤️
                         📤
                     </button>
                 `;
-                badge.title = `${totalPending} sélection(s) en attente d'envoi sur WhatsApp`;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
+            badge.title = `${totalPending} sélection(s) en attente d'envoi sur WhatsApp`;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
         }
     }
+}
 
-    // Forcer l'envoi des compteurs WhatsApp
-    forceSendWhatsAppCounts() {
-        if (Object.keys(this.pendingWhatsAppCounts).length === 0) {
-            this.showAlert('Aucun message WhatsApp en attente', 'info');
-            return;
-        }
-
-        const totalPending = Object.values(this.pendingWhatsAppCounts).reduce((a, b) => a + b, 0);
-        const confirmSend = confirm(
-            `Envoyer ${totalPending} message(s) WhatsApp en attente ?`
-        );
-
-        if (confirmSend) {
-            const message = this.formatPendingWhatsAppMessage();
-            if (message) {
-                this.sendWhatsAppMessage(message).then(success => {
-                    if (success) {
-                        this.pendingWhatsAppCounts = {};
-                        this.savePendingWhatsAppCounts();
-                        this.updatePendingWhatsAppBadge();
-                        this.updateCountersDisplay();
-                        this.showAlert('Messages WhatsApp envoyés avec succès !', 'success');
-                    } else {
-                        this.showAlert('Échec de l\'envoi. Veuillez réessayer.', 'error');
-                    }
-                });
-            }
-        }
+// Forcer l'envoi des compteurs WhatsApp
+forceSendWhatsAppCounts() {
+    if (Object.keys(this.pendingWhatsAppCounts).length === 0) {
+        this.showAlert('Aucun message WhatsApp en attente', 'info');
+        return;
     }
 
-    // Formater message pour les compteurs WhatsApp en attente
-    formatPendingWhatsAppMessage() {
-        if (Object.keys(this.pendingWhatsAppCounts).length === 0) {
-            return null;
+    const totalPending = Object.values(this.pendingWhatsAppCounts).reduce((a, b) => a + b, 0);
+    const confirmSend = confirm(
+        `Envoyer ${totalPending} message(s) WhatsApp en attente ?`
+    );
+
+    if (confirmSend) {
+        const message = this.formatPendingWhatsAppMessage();
+        if (message) {
+            this.sendWhatsAppMessage(message).then(success => {
+                if (success) {
+                    this.pendingWhatsAppCounts = {};
+                    this.savePendingWhatsAppCounts();
+                    this.updatePendingWhatsAppBadge();
+                    this.updateCountersDisplay();
+                    this.showAlert('Messages WhatsApp envoyés avec succès !', 'success');
+                } else {
+                    this.showAlert('Échec de l\'envoi. Veuillez réessayer.', 'error');
+                }
+            });
         }
+    }
+}
 
-        const date = new Date().toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+// Formater message pour les compteurs WhatsApp en attente
+formatPendingWhatsAppMessage() {
+    if (Object.keys(this.pendingWhatsAppCounts).length === 0) {
+        return null;
+    }
 
-        const totalPending = Object.values(this.pendingWhatsAppCounts).reduce((a, b) => a + b, 0);
+    const date = new Date().toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 
-        return `
+    const totalPending = Object.values(this.pendingWhatsAppCounts).reduce((a, b) => a + b, 0);
+
+    return `
 📱 MESSAGES WHATSAPP EN ATTENTE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -941,26 +949,26 @@ ${date}
 
 📊 COMPTEURS EN ATTENTE
 ${Object.entries(this.pendingWhatsAppCounts)
-                .map(([boisson, count]) => `• ${boisson}: ${count} personne${count > 1 ? 's' : ''}`)
-                .join('\n')}
+            .map(([boisson, count]) => `• ${boisson}: ${count} personne${count > 1 ? 's' : ''}`)
+            .join('\n')}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💝 Total: ${totalPending} message(s) en attente
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         `.trim();
-    }
+}
 
-    // ========== SUCCESS MESSAGES ==========
+// ========== SUCCESS MESSAGES ==========
 
-    // Afficher succès en ligne
-    showSuccessWithWhatsAppButton(name, selectedBoissons) {
-        const message = this.formatWhatsAppMessage(name, selectedBoissons);
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${this.whatsappNumber.replace(/\D/g, '')}?text=${encodedMessage}`;
+// Afficher succès en ligne
+showSuccessWithWhatsAppButton(name, selectedBoissons) {
+    const message = this.formatWhatsAppMessage(name, selectedBoissons);
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${this.whatsappNumber.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-        const successDiv = document.createElement('div');
-        successDiv.id = 'success-message-enhanced';
-        successDiv.style.cssText = `
+    const successDiv = document.createElement('div');
+    successDiv.id = 'success-message-enhanced';
+    successDiv.style.cssText = `
             position: fixed;
             top: 50%;
             left: 50%;
@@ -977,7 +985,7 @@ ${Object.entries(this.pendingWhatsAppCounts)
             border: 3px solid #4CAF50;
         `;
 
-        successDiv.innerHTML = `
+    successDiv.innerHTML = `
             <div style="margin-bottom: 20px;">
                 <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
                 <h3 style="color: #4CAF50; margin-bottom: 10px;">Succès !</h3>
@@ -1011,22 +1019,22 @@ ${Object.entries(this.pendingWhatsAppCounts)
             </button>
         `;
 
-        document.body.appendChild(successDiv);
+    document.body.appendChild(successDiv);
 
-        setTimeout(() => {
-            if (successDiv.parentNode) {
-                successDiv.parentNode.removeChild(successDiv);
-            }
-        }, 5000);
-    }
+    setTimeout(() => {
+        if (successDiv.parentNode) {
+            successDiv.parentNode.removeChild(successDiv);
+        }
+    }, 5000);
+}
 
-    // Afficher succès hors-ligne
-    showOfflineSuccess(name, selectedBoissons) {
-        const pending = JSON.parse(localStorage.getItem(this.pendingReservationsKey) || '[]');
+// Afficher succès hors-ligne
+showOfflineSuccess(name, selectedBoissons) {
+    const pending = JSON.parse(localStorage.getItem(this.pendingReservationsKey) || '[]');
 
-        const successDiv = document.createElement('div');
-        successDiv.id = 'offline-success';
-        successDiv.style.cssText = `
+    const successDiv = document.createElement('div');
+    successDiv.id = 'offline-success';
+    successDiv.style.cssText = `
             position: fixed;
             top: 50%;
             left: 50%;
@@ -1043,7 +1051,7 @@ ${Object.entries(this.pendingWhatsAppCounts)
             border: 3px solid #FF9800;
         `;
 
-        successDiv.innerHTML = `
+    successDiv.innerHTML = `
             <div style="margin-bottom: 20px;">
                 <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
                 <h3 style="color: #FF9800; margin-bottom: 10px;">Enregistré hors-ligne</h3>
@@ -1081,30 +1089,30 @@ ${Object.entries(this.pendingWhatsAppCounts)
             </button>
         `;
 
-        document.body.appendChild(successDiv);
+    document.body.appendChild(successDiv);
 
-        setTimeout(() => {
-            if (successDiv.parentNode) {
-                successDiv.parentNode.removeChild(successDiv);
-            }
-        }, 5000);
-    }
+    setTimeout(() => {
+        if (successDiv.parentNode) {
+            successDiv.parentNode.removeChild(successDiv);
+        }
+    }, 5000);
+}
 
-    // ========== UI HELPERS ==========
+// ========== UI HELPERS ==========
 
-    // Afficher une alerte
-    showAlert(message, type = 'info') {
-        const types = {
-            success: { color: '#4CAF50', icon: '✅' },
-            error: { color: '#f44336', icon: '❌' },
-            warning: { color: '#FF9800', icon: '⚠️' },
-            info: { color: '#2196F3', icon: 'ℹ️' }
-        };
+// Afficher une alerte
+showAlert(message, type = 'info') {
+    const types = {
+        success: { color: '#4CAF50', icon: '✅' },
+        error: { color: '#f44336', icon: '❌' },
+        warning: { color: '#FF9800', icon: '⚠️' },
+        info: { color: '#2196F3', icon: 'ℹ️' }
+    };
 
-        const config = types[type] || types.info;
+    const config = types[type] || types.info;
 
-        const alertDiv = document.createElement('div');
-        alertDiv.style.cssText = `
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
@@ -1121,7 +1129,7 @@ ${Object.entries(this.pendingWhatsAppCounts)
             max-width: 350px;
         `;
 
-        alertDiv.innerHTML = `
+    alertDiv.innerHTML = `
             <span style="font-size: 20px;">${config.icon}</span>
             <div>
                 <div style="font-weight: bold; font-size: 0.95rem; margin-bottom: 3px;">
@@ -1136,43 +1144,43 @@ ${Object.entries(this.pendingWhatsAppCounts)
             </button>
         `;
 
-        document.body.appendChild(alertDiv);
+    document.body.appendChild(alertDiv);
 
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 5000);
-    }
-
-    // Afficher une erreur
-    showError(message) {
-        this.showAlert(message, 'error');
-    }
-
-    // Afficher un warning
-    showWarning(message) {
-        this.showAlert(message, 'warning');
-    }
-
-    // Afficher un succès
-    showSuccess(message) {
-        this.showAlert(message, 'success');
-    }
-
-    // ========== ANIMATIONS ==========
-
-    // Créer des cœurs flottants
-    createFloatingHearts() {
-        if (this.heartsInterval) {
-            clearInterval(this.heartsInterval);
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
         }
+    }, 5000);
+}
 
-        this.heartsInterval = setInterval(() => {
-            const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.innerHTML = '❤️';
-            heart.style.cssText = `
+// Afficher une erreur
+showError(message) {
+    this.showAlert(message, 'error');
+}
+
+// Afficher un warning
+showWarning(message) {
+    this.showAlert(message, 'warning');
+}
+
+// Afficher un succès
+showSuccess(message) {
+    this.showAlert(message, 'success');
+}
+
+// ========== ANIMATIONS ==========
+
+// Créer des cœurs flottants
+createFloatingHearts() {
+    if (this.heartsInterval) {
+        clearInterval(this.heartsInterval);
+    }
+
+    this.heartsInterval = setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerHTML = '❤️';
+        heart.style.cssText = `
                 position: fixed;
                 top: 100vh;
                 left: ${Math.random() * 100}vw;
@@ -1181,24 +1189,24 @@ ${Object.entries(this.pendingWhatsAppCounts)
                 pointer-events: none;
                 animation: floatUp ${2 + Math.random() * 3}s linear forwards;
             `;
-            document.body.appendChild(heart);
+        document.body.appendChild(heart);
 
-            setTimeout(() => {
-                if (heart.parentNode) {
-                    heart.parentNode.removeChild(heart);
-                }
-            }, 7000);
-        }, CONFIG.HEARTS_INTERVAL);
-    }
+        setTimeout(() => {
+            if (heart.parentNode) {
+                heart.parentNode.removeChild(heart);
+            }
+        }, 7000);
+    }, CONFIG.HEARTS_INTERVAL);
+}
 
-    // Créer des cœurs de célébration
-    createCelebrationHearts() {
-        for (let i = 0; i < 15; i++) {
-            setTimeout(() => {
-                const heart = document.createElement('div');
-                heart.className = 'celebration-heart';
-                heart.innerHTML = ['❤️', '💖', '💗', '💓', '💞'][Math.floor(Math.random() * 5)];
-                heart.style.cssText = `
+// Créer des cœurs de célébration
+createCelebrationHearts() {
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'celebration-heart';
+            heart.innerHTML = ['❤️', '💖', '💗', '💓', '💞'][Math.floor(Math.random() * 5)];
+            heart.style.cssText = `
                     position: fixed;
                     top: 80vh;
                     left: ${Math.random() * 100}vw;
@@ -1207,29 +1215,29 @@ ${Object.entries(this.pendingWhatsAppCounts)
                     pointer-events: none;
                     animation: celebrate ${1 + Math.random()}s ease-out forwards;
                 `;
-                document.body.appendChild(heart);
+            document.body.appendChild(heart);
 
-                setTimeout(() => {
-                    if (heart.parentNode) {
-                        heart.parentNode.removeChild(heart);
-                    }
-                }, 1500);
-            }, i * 100);
-        }
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, 1500);
+        }, i * 100);
     }
+}
 
-    // Nettoyer les ressources
-    cleanup() {
-        if (this.heartsInterval) {
-            clearInterval(this.heartsInterval);
-            this.heartsInterval = null;
-        }
+// Nettoyer les ressources
+cleanup() {
+    if (this.heartsInterval) {
+        clearInterval(this.heartsInterval);
+        this.heartsInterval = null;
     }
+}
 
-    // Méthode pour synchroniser depuis l'extérieur
-    syncPendingReservations() {
-        return this.syncPendingReservations();
-    }
+// Méthode pour synchroniser depuis l'extérieur
+syncPendingReservations() {
+    return this.syncPendingReservations();
+}
 }
 
 // Initialisation
