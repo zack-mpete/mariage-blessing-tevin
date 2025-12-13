@@ -83,7 +83,13 @@ h1 {
   padding: 2rem;
   margin: 0 0 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background: floralwhite;
+  background: linear-gradient(
+      rgba(254, 251, 251, 0.745),
+      rgba(246, 243, 243, 0.508)
+    ),
+    url("../assets/background1.jpg") center/cover no-repeat fixed;
+  background-size: cover;
+  background-position: center;
   backdrop-filter: blur(10px);
   border-radius: 10px;
 }
@@ -103,7 +109,8 @@ h1 {
   border: 5px solid var(--champagne);
   border-radius: 10px;
   font-family: "Lucida Calligraphy", cursive;
-  background: floralwhite;
+  background: linear-gradient(rgba(241, 241, 224, 0.84), #eccfe5a1),
+    url("../assets/background1.jpg") center/cover no-repeat fixed;
   line-height: 1.4;
 }
 
@@ -111,9 +118,10 @@ h1 {
   color: #333;
   line-height: 1.1;
   margin: 0 0 25px;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   text-align: center;
   padding: 0 10px;
+  font-weight: bold;
 }
 
 .texte .p2 {
@@ -226,21 +234,43 @@ h1 {
 .lieux p {
   margin: 0;
   padding: 0;
-  font-size: 0.7rem;
+  font-size: 1rem;
   color: var(--text-color);
+}
+.img-txt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .noms-couple {
   display: flex;
   flex-direction: column;
-  font-size: 8vw;
   color: var(--champagne);
   text-align: center;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 50%;
+  font-size: 3rem;
   flex-wrap: wrap;
   line-height: 1;
-  margin: 20px 0;
+}
+.photo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: auto;
+  padding: 10px;
+  border: 3px solid var(--champagne);
+  border-top-right-radius: 50px;
+  border-bottom-left-radius: 50px;
+  margin-bottom: 20px;
+}
+.photo img {
+  width: 100%;
+  height: auto;
+  border-top-right-radius: 45px;
+  border-bottom-left-radius: 45px;
 }
 
 /* Message de bienvenue */
