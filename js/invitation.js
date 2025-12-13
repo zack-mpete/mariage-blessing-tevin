@@ -1,66 +1,129 @@
-// Fonction pour récupérer les données de réservation
+// Fonction pour récupérer les données de réservation (MAJ)
 function getReservationData() {
     try {
         console.log('Récupération des données de réservation...');
-        const reservationData = sessionStorage.getItem('reservationData');
+
+        // Essayer d'abord sessionStorage (pour les données récentes)
+        let reservationData = sessionStorage.getItem('reservationData');
+
+        // Si pas dans sessionStorage, essayer localStorage
+        if (!reservationData) {
+            console.log('Pas de données dans sessionStorage, vérification localStorage...');
+            const inviteName = localStorage.getItem('inviteName');
+            if (inviteName) {
+                reservationData = JSON.stringify({
+                    nom: inviteName,
+                    date: new Date().toISOString(),
+                    timestamp: Date.now()
+                });
+                // Sauvegarder aussi dans sessionStorage pour les prochaines utilisations
+                sessionStorage.setItem('reservationData', reservationData);
+            }
+        }
 
         if (reservationData) {
             const data = JSON.parse(reservationData);
-            console.log('Données récupérées:', data);
+            console.log('✅ Données récupérées:', data);
             return data;
         }
 
-        console.warn('Aucune donnée de réservation trouvée');
+        console.warn('⚠️ Aucune donnée de réservation trouvée');
         return null;
     } catch (error) {
-        console.error('Erreur lors de la récupération des données:', error);
+        console.error('❌ Erreur lors de la récupération des données:', error);
         return null;
     }
 }
 
-// Fonction pour afficher le nom et les boissons
+// Fonction pour afficher le nom (MAJ)
 function displayReservationInfo() {
     try {
         const data = getReservationData();
 
         if (!data) {
             console.log('Utilisation des valeurs par défaut');
+            // Définir un nom par défaut si aucun nom n'est trouvé
+            const defaultName = "Cher(e) invité(e)";
+            this.updateNameInUI(defaultName);
             return;
         }
 
         // Afficher le nom
         if (data.nom) {
-            const nameElement = document.getElementById('guest-name');
-            if (nameElement) {
-                nameElement.textContent = data.nom;
-                console.log('Nom affiché:', data.nom);
-            }
-
-            // Mettre à jour le titre de bienvenue
-            const welcomeTitle = document.getElementById('welcome-title');
-            if (welcomeTitle) {
-                welcomeTitle.textContent = `🎉 Bienvenue ${data.nom} ! 🎉`;
-            }
-
-            const welcomeMessage = document.getElementById('welcome-message');
-            if (welcomeMessage) {
-                welcomeMessage.textContent = `Nous sommes ravis de vous accueillir sur votre invitation personnelle.`;
-            }
-        }
-
-        // Afficher les boissons
-        if (data.boissons && data.boissons.length > 0) {
-            const boissonsElement = document.getElementById('boissons-selectionnees');
-            if (boissonsElement) {
-                const boissonsText = data.boissons.join(', ');
-                boissonsElement.innerHTML = `<strong>Boissons préférées :</strong> ${boissonsText}`;
-                console.log('Boissons affichées:', data.boissons);
-            }
+            this.updateNameInUI(data.nom);
         }
 
     } catch (error) {
         console.error('Erreur lors de l\'affichage des informations:', error);
+        // En cas d'erreur, mettre un nom par défaut
+        this.updateNameInUI("Cher(e) invité(e)");
     }
+}
+
+// Fonction pour mettre à jour le nom dans l'interface (nouvelle)
+function updateNameInUI(name) {
+    console.log('Mise à jour du nom dans l\'UI:', name);
+
+    // Mettre à jour le nom principal
+    const nameElement = document.getElementById('guest-name');
+    if (nameElement) {
+        nameElement.textContent = name;
+        console.log('✅ Nom principal affiché:', name);
+    }
+
+    // Mettre à jour le titre de bienvenue
+    const welcomeTitle = document.getElementById('welcome-title');
+    if (welcomeTitle) {
+        welcomeTitle.textContent = `🎉 Bienvenue ${name} ! 🎉`;
+    }
+
+    const welcomeMessage = document.getElementById('welcome-message');
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Nous sommes ravis de vous accueillir sur votre invitation personnelle.`;
+    }
+
+    // Mettre à jour l'attribut nom dans le texte
+    const nomElements = document.querySelectorAll('.nom');
+    nomElements.forEach(el => {
+        if (el.id !== 'guest-name') { // Ne pas toucher à celui qu'on vient de mettre à jour
+            el.textContent = name;
+        }
+    });
+}
+
+// Fonction pour debug (à supprimer en production)
+function debugStorage() {
+    console.log('=== DEBUG STORAGE ===');
+    console.log('sessionStorage reservationData:', sessionStorage.getItem('reservationData'));
+    console.log('localStorage inviteName:', localStorage.getItem('inviteName'));
+    console.log('localStorage keys:', Object.keys(localStorage));
+    console.log('=====================');
+}
+
+// Fonction pour tester la récupération du nom (à supprimer en production)
+function testNameRetrieval() {
+    console.log('=== TEST NAME RETRIEVAL ===');
+    const testName = "Jean Dupont";
+
+    // Simuler une sauvegarde
+    const testData = {
+        nom: testName,
+        date: new Date().toISOString(),
+        timestamp: Date.now()
+    };
+
+    sessionStorage.setItem('reservationData', JSON.stringify(testData));
+    localStorage.setItem('inviteName', testName);
+
+    console.log('Données de test sauvegardées');
+
+    // Tester la récupération
+    const retrievedData = getReservationData();
+    console.log('Données récupérées:', retrievedData);
+
+    // Tester l'affichage
+    displayReservationInfo();
+    console.log('=== FIN TEST ===');
 }
 
 // Fonction pour capturer l'invitation complète
@@ -83,7 +146,7 @@ function captureInvitation() {
                 position: fixed;
                 left: -9999px;
                 top: 0;
-                width: 794px; /* Largeur A4 en pixels (210mm) */
+                width: 794px;
                 padding: 40px;
                 background: white;
                 box-shadow: 0 0 20px rgba(0,0,0,0.1);
@@ -92,17 +155,15 @@ function captureInvitation() {
             document.body.appendChild(clone);
 
             html2canvas(clone, {
-                scale: 2, // Haute qualité pour impression
+                scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
                 allowTaint: true,
                 onclone: (document, element) => {
-                    // Appliquer des styles optimisés pour la capture
                     element.style.width = '794px';
                     element.style.boxSizing = 'border-box';
 
-                    // S'assurer que tous les éléments sont visibles
                     const allElements = element.querySelectorAll('*');
                     allElements.forEach(el => {
                         el.style.visibility = 'visible';
@@ -129,7 +190,6 @@ function downloadInvitationPDF() {
         const downloadBtn = document.getElementById('download-btn');
         const originalText = downloadBtn?.querySelector('.btn-text')?.textContent;
 
-        // Mettre à jour le texte du bouton
         if (downloadBtn) {
             downloadBtn.querySelector('.btn-text').textContent = 'Génération en cours...';
             downloadBtn.disabled = true;
@@ -139,7 +199,6 @@ function downloadInvitationPDF() {
             const data = getReservationData();
             const guestName = data?.nom || 'Invité';
 
-            // Créer le PDF
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
                 orientation: 'portrait',
@@ -150,17 +209,14 @@ function downloadInvitationPDF() {
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
 
-            // Convertir le canvas en image
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
             const imgWidth = canvas.width;
             const imgHeight = canvas.height;
 
-            // Calculer les dimensions pour s'adapter à la page A4
             const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight) * 0.95;
             const centerX = (pageWidth - imgWidth * ratio) / 2;
             const centerY = (pageHeight - imgHeight * ratio) / 2;
 
-            // Ajouter l'image au PDF
             pdf.addImage(
                 imgData,
                 'JPEG',
@@ -170,7 +226,6 @@ function downloadInvitationPDF() {
                 imgHeight * ratio
             );
 
-            // Ajouter des métadonnées
             pdf.setProperties({
                 title: `Invitation Mariage - ${guestName}`,
                 subject: 'Invitation au mariage de Blessing & Tevin',
@@ -179,13 +234,9 @@ function downloadInvitationPDF() {
                 creator: 'Site Mariage B&T'
             });
 
-            // Générer le nom de fichier
             const fileName = generateFileName(guestName);
-
-            // Télécharger le PDF
             pdf.save(fileName);
 
-            // Réinitialiser le bouton
             if (downloadBtn) {
                 setTimeout(() => {
                     downloadBtn.querySelector('.btn-text').textContent = '✅ Téléchargé !';
@@ -220,7 +271,6 @@ function printInvitation() {
         const printBtn = document.getElementById('print-btn');
         const originalText = printBtn?.querySelector('.btn-text')?.textContent;
 
-        // Mettre à jour le texte du bouton
         if (printBtn) {
             printBtn.querySelector('.btn-text').textContent = 'Préparation...';
             printBtn.disabled = true;
@@ -230,7 +280,6 @@ function printInvitation() {
             const data = getReservationData();
             const guestName = data?.nom || 'Invité';
 
-            // Créer une nouvelle fenêtre pour l'impression
             const printWindow = window.open('', '_blank', 'width=800,height=600');
 
             if (!printWindow) {
@@ -242,7 +291,6 @@ function printInvitation() {
                 return;
             }
 
-            // Préparer le contenu HTML pour l'impression
             const imgData = canvas.toDataURL('image/png');
 
             printWindow.document.write(`
@@ -329,7 +377,6 @@ function printInvitation() {
 
             printWindow.document.close();
 
-            // Réinitialiser le bouton après impression
             printWindow.onbeforeunload = function () {
                 if (printBtn) {
                     printBtn.querySelector('.btn-text').textContent = '✅ Imprimé !';
@@ -380,7 +427,10 @@ function generateFileName(guestName) {
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('Initialisation de la page d\'invitation...');
+    console.log('🎉 Initialisation de la page d\'invitation...');
+
+    // Afficher le debug storage (à supprimer en production)
+    debugStorage();
 
     // Afficher les informations de réservation
     displayReservationInfo();
@@ -388,15 +438,33 @@ document.addEventListener('DOMContentLoaded', function () {
     // Configurer les boutons d'action
     const downloadBtn = document.getElementById('download-btn');
     const printBtn = document.getElementById('print-btn');
+    const shareBtn = document.getElementById('share-btn');
 
     if (downloadBtn) {
         downloadBtn.addEventListener('click', downloadInvitationPDF);
-        console.log('Bouton téléchargement configuré');
+        console.log('✅ Bouton téléchargement configuré');
     }
 
     if (printBtn) {
         printBtn.addEventListener('click', printInvitation);
-        console.log('Bouton impression configuré');
+        console.log('✅ Bouton impression configuré');
+    }
+
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function () {
+            const data = getReservationData();
+            const guestName = data?.nom || "Invité";
+            const message =
+                `🎉 Je viens de recevoir mon invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
+                `Je m'appelle ${guestName} et je suis invité(e) à leur célébration le 27 décembre 2025.\n\n` +
+                `💝 Rendez-vous sur le site pour réserver votre place !`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+
+            window.open(whatsappUrl, "_blank");
+        });
+        console.log('✅ Bouton partage configuré');
     }
 
     // Menu mobile
