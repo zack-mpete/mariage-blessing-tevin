@@ -262,15 +262,15 @@ h1 {
   height: auto;
   padding: 10px;
   border: 3px solid var(--champagne);
-  border-top-right-radius: 50px;
-  border-bottom-left-radius: 50px;
+  border-top-right-radius: 26px;
+  border-bottom-left-radius: 26px;
   margin-bottom: 20px;
 }
 .photo img {
   width: 100%;
   height: auto;
-  border-top-right-radius: 45px;
-  border-bottom-left-radius: 45px;
+  border-top-right-radius: 24px;
+  border-bottom-left-radius: 24px;
 }
 
 /* Message de bienvenue */
