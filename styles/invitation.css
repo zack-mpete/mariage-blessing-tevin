@@ -517,30 +517,72 @@ footer p:last-child {
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* Échelle réduite pour ressembler à un document A4 sur mobile */
+  body {
+    font-size: 14px;
+  }
+
   .conteneur {
     flex-direction: column;
     text-align: center;
-    padding: 1.8rem;
+    padding: 1.5rem;
     margin: 0 0 25px;
+    transform: scale(0.95);
+    transform-origin: top center;
+    width: 100%;
+    max-width: 100%;
   }
 
   .texte {
     padding: 25px;
     margin: 0;
+    font-size: 0.95em;
+  }
+
+  .texte .p1 {
+    font-size: 1.3rem;
+    margin: 0 0 20px;
+  }
+
+  .texte .p2 {
+    font-size: 1rem;
+    line-height: 1.2;
   }
 
   .texte .date {
-    font-size: 2.4em;
-    margin: 12px 0;
+    font-size: 2.2em;
+    margin: 10px 0;
+    letter-spacing: 2px;
   }
 
   .separator {
-    font-size: 1.9em;
-    margin: 0 8px;
+    font-size: 1.8em;
+    height: auto;
+    margin: 5px 0;
   }
 
   .heure {
-    font-size: 1.7em;
+    font-size: 1.6em;
+    margin-bottom: 15px;
+  }
+
+  .lieux span {
+    font-size: 1.2em;
+  }
+
+  .lieux p {
+    font-size: 0.95rem;
+  }
+
+  .noms-couple {
+    font-size: 2.5rem;
+    width: 100%;
+  }
+
+  .photo {
+    width: 80%;
+    max-width: 250px;
+    margin: 0 auto 15px;
   }
 
   .buttons button {
@@ -548,72 +590,85 @@ footer p:last-child {
     width: 100%;
     max-width: 320px;
     padding: 15px 25px;
+    font-size: 1em;
   }
 
   .back-link {
     width: 100%;
     text-align: center;
     padding: 13px 25px;
+    font-size: 1em;
   }
 }
 
 @media (max-width: 576px) {
+  /* Ajustements supplémentaires pour très petits écrans */
+  body {
+    font-size: 13px;
+  }
+
   h1 {
-    font-size: 1.9em;
+    font-size: 1.6em;
     margin: 1.5rem 0 0.8rem;
   }
 
   .page-title {
-    font-size: 2em;
-    margin: 0 0 25px;
+    font-size: 1.8em;
+    margin: 0 0 20px;
   }
 
   .invit-page {
-    padding: 25px 20px;
-    margin: 15px auto;
+    padding: 20px 15px;
+    margin: 10px auto;
+    border-radius: 10px;
   }
 
   .conteneur {
-    padding: 1.5rem;
+    padding: 1.2rem;
+    transform: scale(0.92);
+    margin: 0 0 20px;
   }
 
   .texte {
     padding: 20px;
+    border-width: 3px;
   }
 
   .texte .p1 {
-    font-size: 1.05rem;
-    margin: 0 0 20px;
-    line-height: 1.7;
+    font-size: 1.1rem;
+    margin: 0 0 15px;
   }
 
   .texte .p2 {
-    font-size: 1.05rem;
-    margin: 0 0 25px;
-    line-height: 1.7;
+    font-size: 0.95rem;
+    margin: 0 0 20px;
   }
 
   .texte .date {
-    font-size: 2em;
-    letter-spacing: 2px;
+    font-size: 1.8em;
+    letter-spacing: 1.5px;
   }
 
   .separator {
-    font-size: 1.7em;
-    margin: 0 6px;
+    font-size: 1.6em;
+    margin: 0 5px;
   }
 
   .heure {
-    font-size: 1.5em;
+    font-size: 1.4em;
+  }
+
+  .noms-couple {
+    font-size: 2rem;
   }
 
   .buttons {
-    gap: 15px;
+    gap: 12px;
   }
 
   .buttons button {
-    padding: 14px 22px;
-    font-size: 1em;
+    padding: 14px 20px;
+    font-size: 0.95em;
     min-width: 100%;
   }
 
@@ -622,22 +677,55 @@ footer p:last-child {
   }
 
   .instructions {
-    padding: 18px;
+    padding: 15px;
     margin: 25px 0 0;
+    font-size: 0.95em;
   }
 
   .back-section {
-    padding: 25px 20px;
-    margin: 35px 0 0;
+    padding: 20px 15px;
+    margin: 30px 0 0;
   }
 
   .back-section p {
-    font-size: 1.1em;
+    font-size: 1em;
     margin: 0 0 20px;
   }
 }
 
-/* Styles pour impression */
+@media (max-width: 375px) {
+  /* Ajustements pour iPhone SE et très petits écrans */
+  body {
+    font-size: 12px;
+  }
+
+  .conteneur {
+    transform: scale(0.88);
+    padding: 1rem;
+  }
+
+  .texte {
+    padding: 15px;
+  }
+
+  .texte .p1 {
+    font-size: 1rem;
+  }
+
+  .texte .p2 {
+    font-size: 0.9rem;
+  }
+
+  .texte .date {
+    font-size: 1.6em;
+  }
+
+  .noms-couple {
+    font-size: 1.8rem;
+  }
+}
+
+/* Styles pour impression - SIMILAIRE À L'AFFICHAGE MOBILE */
 @media print {
   .buttons,
   .instructions,
@@ -650,35 +738,57 @@ footer p:last-child {
 
   .invit-page {
     box-shadow: none;
-    border: 1px solid #ddd;
-    padding: 20px;
+    border: none;
+    padding: 0;
     margin: 0;
+    animation: none;
+  }
+
+  .invit-page::before {
+    display: none;
   }
 
   .conteneur {
     box-shadow: none;
-    background: white;
+    background: white !important;
     padding: 1.5rem;
     margin: 0;
+    transform: none !important;
+    backdrop-filter: none;
+    border-radius: 0;
   }
 
   .texte {
-    border: 3px solid #8b0000;
+    border: 2px solid #8b0000 !important;
     padding: 20px;
+    background: white !important;
+    font-size: 0.95em;
   }
 
   .texte .date {
     color: #000;
     text-shadow: none;
+    font-size: 2.2em;
   }
 
   .separator {
     color: #000;
     text-shadow: none;
+    font-size: 1.8em;
   }
 
   .heure {
     color: #000;
     text-shadow: none;
+    font-size: 1.6em;
+  }
+
+  .noms-couple {
+    color: #000;
+    font-size: 2.5rem;
+  }
+
+  body {
+    font-size: 14px;
   }
 }
