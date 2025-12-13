@@ -414,7 +414,7 @@ function envoyerMessageWhatsApp() {
         });
 
         // Numéro WhatsApp (format international)
-        const phoneNumber = '243829225086'; // +243 82 922 5086
+        const phoneNumber = '243828435123'; // +243 82 922 5086
 
         // Construire le message
         const whatsappMessage =

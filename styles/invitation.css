@@ -29,7 +29,8 @@ main {
 h1 {
   font-size: 2rem;
   color: var(--red-color);
-  font-family: "Lucida Calligraphy", cursive;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
   text-align: center;
   letter-spacing: 1px;
   margin: 2rem 0 1rem;
@@ -373,7 +374,8 @@ h1 {
   transition: all 0.3s ease;
   min-width: 260px;
   text-align: center;
-  font-family: "Lucida Calligraphy", cursive;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
   margin: 0;
 }
 
@@ -470,7 +472,8 @@ h1 {
   border-radius: 8px;
   font-weight: 600;
   transition: all 0.3s ease;
-  font-family: "Lucida Calligraphy", cursive;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
   font-size: 1.05em;
   letter-spacing: 0.5px;
 }
