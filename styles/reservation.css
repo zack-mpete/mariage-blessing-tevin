@@ -13,7 +13,8 @@ main {
   text-align: center;
   font-size: 1.4rem;
   color: var(--red-color);
-  font-family: "Lucida Calligraphy", cursive;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
   line-height: 1.3;
 }
 

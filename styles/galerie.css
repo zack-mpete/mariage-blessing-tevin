@@ -8,7 +8,8 @@ h1 {
   text-align: center;
   font-size: 2.5rem;
   color: var(--red-color);
-  font-family: "Lucida Calligraphy", cursive;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
   margin-top: 1rem;
   margin-bottom: 1.5rem;
 }

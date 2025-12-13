@@ -108,7 +108,8 @@ h1 {
   padding: 30px;
   border: 5px solid var(--champagne);
   border-radius: 10px;
-  font-family: "Lucida Calligraphy", cursive;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
   background: linear-gradient(rgba(241, 241, 224, 0.84), #eccfe5a1),
     url("../assets/background1.jpg") center/cover no-repeat fixed;
   line-height: 1.4;
@@ -253,6 +254,8 @@ h1 {
   font-size: 3rem;
   flex-wrap: wrap;
   line-height: 1;
+  font-family: "Georgia", "Palatino", "Book Antiqua";
+  font-style: italic;
 }
 .photo {
   display: flex;
