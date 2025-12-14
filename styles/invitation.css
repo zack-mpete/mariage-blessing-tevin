@@ -226,7 +226,7 @@ h1 {
   margin-bottom: 20px;
 }
 .lieux span {
-  font-size: 2em;
+  font-size: 1.2em;
   color: var(--champagne);
   font-weight: bold;
   text-align: center;
@@ -573,7 +573,7 @@ footer p:last-child {
   }
 
   .lieux span {
-    font-size: 1.7em;
+    font-size: 1.1rem;
   }
 
   .lieux p {
