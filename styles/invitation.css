@@ -135,7 +135,7 @@ h1 {
 
 .texte .p2 .nom {
   font-weight: bold;
-  text-transform: capitalize;
+  text-transform: none;
   padding: 0 4px;
   border-radius: 3px;
 }
