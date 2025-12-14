@@ -1,37 +1,153 @@
-// Fonction pour récupérer les données de réservation (MAJ)
+// Fonction pour récupérer les données de réservation (version améliorée)
 function getReservationData() {
     try {
-        console.log('Récupération des données de réservation...');
+        console.log('🔍 Récupération des données de réservation...');
 
-        // Essayer d'abord sessionStorage (pour les données récentes)
+        // 1. Essayer d'abord sessionStorage (données de la session courante)
         let reservationData = sessionStorage.getItem('reservationData');
 
-        // Si pas dans sessionStorage, essayer localStorage
+        // 2. Si vide, essayer localStorage
         if (!reservationData) {
-            console.log('Pas de données dans sessionStorage, vérification localStorage...');
-            const inviteName = localStorage.getItem('inviteName');
-            if (inviteName) {
-                reservationData = JSON.stringify({
-                    nom: inviteName,
-                    date: new Date().toISOString(),
-                    timestamp: Date.now()
-                });
-                // Sauvegarder aussi dans sessionStorage pour les prochaines utilisations
-                sessionStorage.setItem('reservationData', reservationData);
+            console.log('📦 Données non trouvées dans sessionStorage, vérification localStorage...');
+            reservationData = localStorage.getItem('reservationData');
+        }
+
+        // 3. Si on a des données JSON, les parser
+        if (reservationData) {
+            try {
+                const data = JSON.parse(reservationData);
+                console.log('✅ Données récupérées:', data);
+                return data;
+            } catch (parseError) {
+                console.error('❌ Erreur de parsing JSON:', parseError);
             }
         }
 
-        if (reservationData) {
-            const data = JSON.parse(reservationData);
-            console.log('✅ Données récupérées:', data);
-            return data;
+        // 4. Fallback: vérifier les anciennes clés pour compatibilité
+        console.log('🔄 Tentative de récupération avec les anciennes clés...');
+        const inviteName = localStorage.getItem('inviteName');
+        const reservationType = localStorage.getItem('reservationType') || 'seul';
+
+        if (inviteName) {
+            const fallbackData = {
+                nom: inviteName,
+                type: reservationType,
+                date: new Date().toISOString(),
+                timestamp: Date.now(),
+                source: 'legacy'
+            };
+            console.log('✅ Données de fallback récupérées:', fallbackData);
+
+            // Sauvegarder au format JSON pour les prochaines fois
+            sessionStorage.setItem('reservationData', JSON.stringify(fallbackData));
+
+            return fallbackData;
         }
 
         console.warn('⚠️ Aucune donnée de réservation trouvée');
         return null;
+
     } catch (error) {
         console.error('❌ Erreur lors de la récupération des données:', error);
         return null;
+    }
+}
+
+// Fonction pour personnaliser l'interface selon le type de réservation
+function customizeInterfaceForReservationType(type, name) {
+    console.log('🎭 Personnalisation pour le type:', type);
+
+    // Personnaliser le message de salutation
+    const greetingElement = document.getElementById('personalized-greeting');
+    if (greetingElement) {
+        if (type === 'couple') {
+            greetingElement.innerHTML = `Chers <span class="nom" id="guest-name">${name}</span>, nous avons
+              l'immense joie de vous convier à la célébration de notre mariage
+              le <strong>samedi</strong>`;
+        } else {
+            greetingElement.innerHTML = `Cher(e) <span class="nom" id="guest-name">${name}</span>, nous avons
+              l'immense joie de vous convier à la célébration de notre mariage
+              le <strong>samedi</strong>`;
+        }
+    }
+
+    // Personnaliser les messages spécifiques
+    const coupleMessage = document.getElementById('couple-message');
+    const singleMessage = document.getElementById('single-message');
+
+    if (type === 'couple') {
+        if (coupleMessage) coupleMessage.style.display = 'block';
+        if (singleMessage) singleMessage.style.display = 'none';
+    } else {
+        if (coupleMessage) coupleMessage.style.display = 'none';
+        if (singleMessage) singleMessage.style.display = 'block';
+    }
+
+    // Personnaliser les informations de réservation
+    const reservationTypeInfo = document.getElementById('reservation-type-info');
+    if (reservationTypeInfo) {
+        if (type === 'couple') {
+            reservationTypeInfo.innerHTML = `
+                <div class="reservation-type-details">
+                    <p>👥 <strong>Réservation pour un couple</strong></p>
+                    <p>Deux places vous sont réservées</p>
+                </div>
+            `;
+        } else {
+            reservationTypeInfo.innerHTML = `
+                <div class="reservation-type-details">
+                    <p>👤 <strong>Réservation pour une personne</strong></p>
+                    <p>Une place vous est réservée</p>
+                </div>
+            `;
+        }
+    }
+
+    // Personnaliser les badges de type
+    const guestTypeBadge = document.getElementById('guest-type-badge');
+    if (guestTypeBadge) {
+        if (type === 'couple') {
+            guestTypeBadge.innerHTML = '<span class="badge couple">👥 Invité en couple</span>';
+            guestTypeBadge.className = 'guest-type-badge couple';
+        } else {
+            guestTypeBadge.innerHTML = '<span class="badge single">👤 Invité seul(e)</span>';
+            guestTypeBadge.className = 'guest-type-badge single';
+        }
+    }
+
+    // Personnaliser les boutons
+    const downloadHint = document.getElementById('download-hint');
+    const printHint = document.getElementById('print-hint');
+    const shareHint = document.getElementById('share-hint');
+
+    if (type === 'couple') {
+        if (downloadHint) downloadHint.textContent = ' (pour vous deux)';
+        if (printHint) printHint.textContent = ' (pour vous deux)';
+        if (shareHint) shareHint.textContent = ' (partagez en couple)';
+    } else {
+        if (downloadHint) downloadHint.textContent = ' (votre copie)';
+        if (printHint) printHint.textContent = ' (votre copie)';
+        if (shareHint) shareHint.textContent = ' (partagez avec vos proches)';
+    }
+
+    // Personnaliser les instructions
+    const instructionsText = document.getElementById('instructions-text');
+    if (instructionsText) {
+        if (type === 'couple') {
+            instructionsText.innerHTML = '💝 <strong>Astuce :</strong> Téléchargez ou imprimez votre invitation pour la conserver en souvenir, une seule invitation pour vous deux suffit !';
+        } else {
+            instructionsText.innerHTML = '💝 <strong>Astuce :</strong> Téléchargez ou imprimez votre invitation pour la conserver en souvenir !';
+        }
+    }
+
+    // Personnaliser le footer
+    const footerReservationType = document.getElementById('footer-reservation-type');
+    if (footerReservationType) {
+        if (type === 'couple') {
+            footerReservationType.textContent = 'Invitation valable pour deux personnes';
+        } else {
+            footerReservationType.textContent = 'Invitation valable pour une personne';
+        }
     }
 }
 
@@ -40,97 +156,97 @@ function displayReservationInfo() {
     try {
         const data = getReservationData();
 
-        if (!data) {
-            console.log('Utilisation des valeurs par défaut');
-            // Définir un nom par défaut si aucun nom n'est trouvé
+        if (!data || !data.nom) {
+            console.log('🎭 Utilisation des valeurs par défaut');
             const defaultName = "Cher(e) invité(e)";
             this.updateNameInUI(defaultName);
+            this.customizeInterfaceForReservationType('seul', defaultName);
             return;
         }
 
         // Afficher le nom
         if (data.nom) {
+            console.log('✨ Affichage du nom:', data.nom);
             this.updateNameInUI(data.nom);
         }
 
+        // Personnaliser selon le type de réservation
+        if (data.type) {
+            console.log('📝 Type de réservation détecté:', data.type);
+            this.customizeInterfaceForReservationType(data.type, data.nom);
+        } else {
+            // Par défaut, on considère "seul"
+            this.customizeInterfaceForReservationType('seul', data.nom || "Cher(e) invité(e)");
+        }
+
     } catch (error) {
-        console.error('Erreur lors de l\'affichage des informations:', error);
-        // En cas d'erreur, mettre un nom par défaut
+        console.error('💥 Erreur lors de l\'affichage des informations:', error);
         this.updateNameInUI("Cher(e) invité(e)");
+        this.customizeInterfaceForReservationType('seul', "Cher(e) invité(e)");
     }
 }
 
-// Fonction pour mettre à jour le nom dans l'interface (nouvelle)
+// Fonction pour mettre à jour le nom dans l'interface
 function updateNameInUI(name) {
-    console.log('Mise à jour du nom dans l\'UI:', name);
+    console.log('🎨 Mise à jour du nom dans l\'UI:', name);
 
-    // Mettre à jour le nom principal
+    // Mettre à jour le nom principal avec fallback sécurisé
     const nameElement = document.getElementById('guest-name');
     if (nameElement) {
-        nameElement.textContent = name;
-        console.log('✅ Nom principal affiché:', name);
+        nameElement.textContent = name || "Cher(e) invité(e)";
+        console.log('✅ Nom principal affiché');
     }
 
     // Mettre à jour le titre de bienvenue
     const welcomeTitle = document.getElementById('welcome-title');
     if (welcomeTitle) {
-        welcomeTitle.textContent = `🎉 Bienvenue ${name} ! 🎉`;
+        const data = getReservationData();
+        const type = data?.type || 'seul';
+
+        if (type === 'couple') {
+            welcomeTitle.textContent = `🎉 Bienvenue à vous deux ! 🎉`;
+        } else {
+            welcomeTitle.textContent = `🎉 Bienvenue ${name || "Cher(e) invité(e)"} ! 🎉`;
+        }
     }
 
     const welcomeMessage = document.getElementById('welcome-message');
     if (welcomeMessage) {
-        welcomeMessage.textContent = `Nous sommes ravis de vous accueillir sur votre invitation personnelle.`;
+        const data = getReservationData();
+        const type = data?.type || 'seul';
+
+        if (type === 'couple') {
+            welcomeMessage.textContent = 'Nous sommes ravis de vous accueillir en tant que couple sur votre invitation personnelle.';
+        } else {
+            welcomeMessage.textContent = 'Nous sommes ravis de vous accueillir sur votre invitation personnelle.';
+        }
     }
 
-    // Mettre à jour l'attribut nom dans le texte
+    // Mettre à jour tous les éléments avec la classe .nom
     const nomElements = document.querySelectorAll('.nom');
     nomElements.forEach(el => {
-        if (el.id !== 'guest-name') { // Ne pas toucher à celui qu'on vient de mettre à jour
-            el.textContent = name;
+        if (el.id !== 'guest-name') {
+            el.textContent = name || "Cher(e) invité(e)";
         }
     });
 }
 
-// Fonction pour debug (à supprimer en production)
+// Fonction pour debug (utile pour le développement)
 function debugStorage() {
-    console.log('=== DEBUG STORAGE ===');
+    console.log('=== 🔍 DEBUG STORAGE ===');
     console.log('sessionStorage reservationData:', sessionStorage.getItem('reservationData'));
+    console.log('localStorage reservationData:', localStorage.getItem('reservationData'));
     console.log('localStorage inviteName:', localStorage.getItem('inviteName'));
+    console.log('localStorage reservationType:', localStorage.getItem('reservationType'));
     console.log('localStorage keys:', Object.keys(localStorage));
-    console.log('=====================');
-}
-
-// Fonction pour tester la récupération du nom (à supprimer en production)
-function testNameRetrieval() {
-    console.log('=== TEST NAME RETRIEVAL ===');
-    const testName = "Jean Dupont";
-
-    // Simuler une sauvegarde
-    const testData = {
-        nom: testName,
-        date: new Date().toISOString(),
-        timestamp: Date.now()
-    };
-
-    sessionStorage.setItem('reservationData', JSON.stringify(testData));
-    localStorage.setItem('inviteName', testName);
-
-    console.log('Données de test sauvegardées');
-
-    // Tester la récupération
-    const retrievedData = getReservationData();
-    console.log('Données récupérées:', retrievedData);
-
-    // Tester l'affichage
-    displayReservationInfo();
-    console.log('=== FIN TEST ===');
+    console.log('sessionStorage keys:', Object.keys(sessionStorage));
+    console.log('=========================');
 }
 
 // Fonction pour capturer l'invitation complète
 function captureInvitation() {
     return new Promise((resolve, reject) => {
         try {
-            // Cibler uniquement la section invitation principale
             const invitationSection = document.querySelector('.invit-page .conteneur');
 
             if (!invitationSection) {
@@ -138,9 +254,8 @@ function captureInvitation() {
                 return;
             }
 
-            console.log('Capture de l\'invitation...');
+            console.log('📸 Capture de l\'invitation...');
 
-            // Cloner la section pour éviter d'affecter le style original
             const clone = invitationSection.cloneNode(true);
             clone.style.cssText = `
                 position: fixed;
@@ -198,6 +313,7 @@ function downloadInvitationPDF() {
         captureInvitation().then(canvas => {
             const data = getReservationData();
             const guestName = data?.nom || 'Invité';
+            const reservationType = data?.type || 'seul';
 
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
@@ -226,15 +342,22 @@ function downloadInvitationPDF() {
                 imgHeight * ratio
             );
 
+            // Ajouter une note selon le type
+            if (reservationType === 'couple') {
+                pdf.setFontSize(10);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Invitation valable pour deux personnes', 105, 280, { align: 'center' });
+            }
+
             pdf.setProperties({
                 title: `Invitation Mariage - ${guestName}`,
-                subject: 'Invitation au mariage de Blessing & Tevin',
+                subject: `Invitation au mariage de Blessing & Tevin - ${reservationType === 'couple' ? 'Couple' : 'Personne seule'}`,
                 author: 'Blessing & Tevin',
-                keywords: 'mariage, invitation',
+                keywords: `mariage, invitation, ${reservationType}`,
                 creator: 'Site Mariage B&T'
             });
 
-            const fileName = generateFileName(guestName);
+            const fileName = generateFileName(guestName, reservationType);
             pdf.save(fileName);
 
             if (downloadBtn) {
@@ -250,7 +373,7 @@ function downloadInvitationPDF() {
             }
 
         }).catch(error => {
-            console.error('Erreur lors de la capture:', error);
+            console.error('❌ Erreur lors de la capture:', error);
             alert('Erreur lors de la génération du PDF');
 
             if (downloadBtn) {
@@ -260,7 +383,7 @@ function downloadInvitationPDF() {
         });
 
     } catch (error) {
-        console.error('Erreur lors du téléchargement:', error);
+        console.error('❌ Erreur lors du téléchargement:', error);
         alert('Erreur lors du téléchargement');
     }
 }
@@ -279,6 +402,7 @@ function printInvitation() {
         captureInvitation().then(canvas => {
             const data = getReservationData();
             const guestName = data?.nom || 'Invité';
+            const reservationType = data?.type || 'seul';
 
             const printWindow = window.open('', '_blank', 'width=800,height=600');
 
@@ -349,6 +473,23 @@ function printInvitation() {
                                 margin-top: 20px;
                                 color: #666;
                                 font-size: 14px;
+                                text-align: center;
+                            }
+                            .reservation-type {
+                                margin-top: 10px;
+                                padding: 8px 15px;
+                                background: #f0f0f0;
+                                border-radius: 20px;
+                                display: inline-block;
+                                font-size: 12px;
+                            }
+                            .couple-badge {
+                                background: #e8f5e9;
+                                color: #2e7d32;
+                            }
+                            .single-badge {
+                                background: #e3f2fd;
+                                color: #1565c0;
                             }
                         }
                     </style>
@@ -358,6 +499,9 @@ function printInvitation() {
                         <img src="${imgData}" alt="Invitation de mariage">
                         <div class="print-info">
                             <p>Invitation personnelle pour: ${guestName}</p>
+                            <div class="reservation-type ${reservationType === 'couple' ? 'couple-badge' : 'single-badge'}">
+                                ${reservationType === 'couple' ? '👥 Invitation pour un couple' : '👤 Invitation pour une personne'}
+                            </div>
                             <p>Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
                         </div>
                     </div>
@@ -390,7 +534,7 @@ function printInvitation() {
             };
 
         }).catch(error => {
-            console.error('Erreur lors de l\'impression:', error);
+            console.error('❌ Erreur lors de l\'impression:', error);
             alert('Erreur lors de la préparation de l\'impression');
 
             if (printBtn) {
@@ -400,13 +544,13 @@ function printInvitation() {
         });
 
     } catch (error) {
-        console.error('Erreur lors de l\'impression:', error);
+        console.error('❌ Erreur lors de l\'impression:', error);
         alert('Erreur lors de l\'impression');
     }
 }
 
-// Fonction pour générer un nom de fichier propre
-function generateFileName(guestName) {
+// Fonction pour générer un nom de fichier propre avec type
+function generateFileName(guestName, type = 'seul') {
     const sanitizedName = guestName
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -417,25 +561,26 @@ function generateFileName(guestName) {
         .trim();
 
     const date = new Date().toISOString().split('T')[0];
+    const typeSuffix = type === 'couple' ? '-couple' : '-seul';
 
     if (sanitizedName && sanitizedName !== 'invite') {
-        return `invitation-mariage-${sanitizedName}-${date}.pdf`;
+        return `invitation-mariage-${sanitizedName}${typeSuffix}-${date}.pdf`;
     }
 
-    return `invitation-mariage-${date}.pdf`;
+    return `invitation-mariage${typeSuffix}-${date}.pdf`;
 }
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🎉 Initialisation de la page d\'invitation...');
 
-    // Afficher le debug storage (à supprimer en production)
+    // Afficher le debug storage
     debugStorage();
 
     // Afficher les informations de réservation
     displayReservationInfo();
 
-    // Configurer les boutons d'action
+    // Configurer les boutons d'action avec messages personnalisés
     const downloadBtn = document.getElementById('download-btn');
     const printBtn = document.getElementById('print-btn');
     const shareBtn = document.getElementById('share-btn');
@@ -454,10 +599,20 @@ document.addEventListener('DOMContentLoaded', function () {
         shareBtn.addEventListener('click', function () {
             const data = getReservationData();
             const guestName = data?.nom || "Invité";
-            const message =
-                `🎉 Je viens de recevoir mon invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
-                `Je m'appelle ${guestName} et je suis invité(e) à leur célébration le 27 décembre 2025.\n\n` +
-                `💝 Rendez-vous sur le site pour réserver votre place !`;
+            const reservationType = data?.type || 'seul';
+
+            let message = "";
+            if (reservationType === 'couple') {
+                message = `🎉 Nous venons de recevoir notre invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
+                    `Nous sommes ${guestName} et nous sommes invités en couple à leur célébration le 27 décembre 2025.\n\n` +
+                    `💝 Rendez-vous sur le site pour réserver votre place !\n` +
+                    `https://mariage-blessing-tevin.vercel.app`;
+            } else {
+                message = `🎉 Je viens de recevoir mon invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
+                    `Je m'appelle ${guestName} et je suis invité(e) à leur célébration le 27 décembre 2025.\n\n` +
+                    `💝 Rendez-vous sur le site pour réserver votre place !\n` +
+                    `https://mariage-blessing-tevin.vercel.app`;
+            }
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;

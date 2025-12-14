@@ -28,6 +28,7 @@
       <!-- Message de bienvenue personnalisé -->
       <div id="personalized-welcome">
         <h2 id="welcome-title">🎉 Bienvenue ! 🎉</h2>
+        <div id="guest-type-badge" class="guest-type-badge"></div>
         <p id="welcome-message">
           Nous sommes ravis de vous accueillir sur votre invitation personnelle.
         </p>
@@ -51,68 +52,57 @@
                 <span>Tevin</span>
               </div>
             </div>
-            <div class="p2">
+
+            <!-- Texte personnalisé selon le type de réservation -->
+            <div class="p2" id="personalized-greeting">
               Cher(e) <span class="nom" id="guest-name"></span>, nous avons
               l'immense joie de vous convier à la célébration de notre mariage
               le
               <strong>samedi</strong>
             </div>
+
             <div class="date">27|12|2025</div>
             <span class="separator">|</span>
             <div class="heure">à 19H00</div>
             <div class="lieux">
-              <span>Archevêché Size</span>
+              <span>Archidiocèse</span>
               <p>
                 av. Kasavubu coin Ingénieur Ilunga, réf en diagonale du
                 gouvernorat de Lubumbashi.
               </p>
             </div>
-
-            <div id="reservation-info">
-              <h3>📋 Votre Réservation</h3>
-              <p id="boissons-selectionnees">
-                <!-- Les boissons sélectionnées seront ajoutées ici par JavaScript -->
-              </p>
-              <p class="reservation-thanks">
-                <em>Merci pour vos préférences !</em>
-              </p>
-            </div>
           </div>
         </section>
 
-        <!-- Boutons d'actions -->
+        <!-- Boutons d'actions personnalisés -->
         <div class="buttons">
           <button class="download-btn" id="download-btn">
             <span class="btn-icon">📥</span>
             <span class="btn-text">Télécharger votre invitation</span>
+            <span class="btn-type-hint" id="download-hint"></span>
           </button>
 
           <button class="print-btn" id="print-btn">
             <span class="btn-icon">🖨️</span>
             <span class="btn-text">Imprimer votre invitation</span>
-          </button>
-
-          <button class="share-btn" id="share-btn">
-            <span class="btn-icon">📱</span>
-            <span class="btn-text">Partager sur WhatsApp</span>
+            <span class="btn-type-hint" id="print-hint"></span>
           </button>
         </div>
 
-        <!-- Instructions -->
+        <!-- Instructions personnalisées -->
         <div class="instructions">
-          <p>
+          <p id="instructions-text">
             💝 <strong>Astuce :</strong> Téléchargez ou imprimez votre
             invitation pour la conserver en souvenir !
           </p>
         </div>
       </section>
-
-      <!-- Section retour au formulaire -->
     </main>
 
     <footer>
       <p>© 2025 Mariage Blessing & Tevin - Tous droits réservés</p>
       <p class="footer-note">Cette invitation est personnelle et nominative</p>
+      <p id="footer-reservation-type"></p>
     </footer>
 
     <script src="js/style.js"></script>
@@ -125,11 +115,21 @@
         if (shareBtn) {
           shareBtn.addEventListener("click", function () {
             const guestName = document.querySelector(".nom").textContent;
-            const message =
-              `🎉 Je viens de recevoir mon invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
-              `Je m'appelle ${guestName} et je suis invité(e) à leur célébration le 27 décembre 2025.\n\n` +
-              `💝 Rendez-vous sur le site pour réserver votre place !`;
-            ("http://mariage-blessing-tevin.vercel.app");
+            const reservationType =
+              localStorage.getItem("reservationType") || "seul";
+
+            let message = "";
+            if (reservationType === "couple") {
+              message =
+                `🎉 Nous venons de recevoir notre invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
+                `Nous sommes ${guestName} et nous sommes invités à leur célébration le 27 décembre 2025.\n\n` +
+                `💝 Rendez-vous sur le site pour réserver votre place !`;
+            } else {
+              message =
+                `🎉 Je viens de recevoir mon invitation personnelle pour le mariage de Blessing & Tevin !\n\n` +
+                `Je m'appelle ${guestName} et je suis invité(e) à leur célébration le 27 décembre 2025.\n\n` +
+                `💝 Rendez-vous sur le site pour réserver votre place !`;
+            }
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;

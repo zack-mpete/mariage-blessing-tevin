@@ -41,8 +41,39 @@
             style="display: none"
           ></div>
 
+          <!-- Options de réservation -->
+          <div class="reservation-options">
+            <div class="option-group">
+              <input
+                type="radio"
+                id="option-seul"
+                name="reservation-type"
+                value="seul"
+                checked
+              />
+              <label for="option-seul" class="option-label">
+                <span class="option-icon">👤</span>
+                <span class="option-text">Seul</span>
+              </label>
+            </div>
+
+            <div class="option-group">
+              <input
+                type="radio"
+                id="option-couple"
+                name="reservation-type"
+                value="couple"
+              />
+              <label for="option-couple" class="option-label">
+                <span class="option-icon">👥</span>
+                <span class="option-text">En couple</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Champ nom dynamique -->
           <div class="form-group">
-            <label for="name">Nom & prénom *</label>
+            <label for="name" id="name-label">Nom & prénom *</label>
             <input
               type="text"
               id="name"
@@ -50,6 +81,12 @@
               placeholder="Votre nom et prénom"
               required
             />
+            <div class="Avertissement">
+            <span>Avertissement:</span>
+            <small class="hint" id="name-hint"
+              >Veuillez entrer votre vrai nom et prénom</small
+            >
+            </di>
           </div>
 
           <button type="submit" id="submit-button" class="submit-btn">

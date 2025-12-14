@@ -1,12 +1,14 @@
 // Constantes pour les messages
 const MESSAGES = {
     SUCCESS: 'Merci ! Redirection vers votre invitation...',
-    ERROR: 'Veuillez entrer votre nom complet (minimum 2 caractères)'
+    ERROR_SINGLE: 'Veuillez entrer votre nom complet (minimum 2 caractères)',
+    ERROR_COUPLE: 'Veuillez entrer les noms des deux personnes'
 };
 
 // Gestionnaire de réservation simplifié
 class ReservationManager {
     constructor() {
+        this.reservationType = 'seul'; // Valeur par défaut
         this.init();
     }
 
@@ -14,6 +16,7 @@ class ReservationManager {
     init() {
         console.log('🚀 Initialisation du gestionnaire de réservation...');
         this.setupEventListeners();
+        this.updateFormLabels(); // Initialiser les labels
     }
 
     // Configurer les écouteurs d'événements
@@ -25,6 +28,51 @@ class ReservationManager {
                 this.handleFormSubmit();
             });
         }
+
+        // Écouteurs pour les options de réservation
+        const optionSeul = document.getElementById('option-seul');
+        const optionCouple = document.getElementById('option-couple');
+
+        if (optionSeul) {
+            optionSeul.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    this.reservationType = 'seul';
+                    this.updateFormLabels();
+                }
+            });
+        }
+
+        if (optionCouple) {
+            optionCouple.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    this.reservationType = 'couple';
+                    this.updateFormLabels();
+                }
+            });
+        }
+
+        // Récupérer le type sélectionné au chargement
+        const selectedOption = document.querySelector('input[name="reservation-type"]:checked');
+        if (selectedOption) {
+            this.reservationType = selectedOption.value;
+        }
+    }
+
+    // Mettre à jour les labels et placeholders selon le type
+    updateFormLabels() {
+        const nameLabel = document.getElementById('name-label');
+        const nameInput = document.getElementById('name');
+        const nameHint = document.getElementById('name-hint');
+
+        if (this.reservationType === 'couple') {
+            if (nameLabel) nameLabel.textContent = 'Noms du couple *';
+            if (nameInput) nameInput.placeholder = 'Ex: Jean & Marie Kayembe';
+            if (nameHint) nameHint.textContent = 'Veuillez entrer les prénoms des deux personnes + le nom de famille';
+        } else {
+            if (nameLabel) nameLabel.textContent = 'Nom & prénom *';
+            if (nameInput) nameInput.placeholder = 'Votre nom et prénom';
+            if (nameHint) nameHint.textContent = 'Veuillez entrer votre vrai nom et prénom';
+        }
     }
 
     // Gérer la soumission du formulaire
@@ -32,14 +80,17 @@ class ReservationManager {
         const nameInput = document.getElementById('name');
         const name = nameInput ? nameInput.value.trim() : '';
 
-        // Validation
+        // Validation simple selon le type
         if (!this.validateName(name)) {
-            this.showError(MESSAGES.ERROR);
+            const errorMessage = this.reservationType === 'couple'
+                ? MESSAGES.ERROR_COUPLE
+                : MESSAGES.ERROR_SINGLE;
+            this.showError(errorMessage);
             if (nameInput) nameInput.focus();
             return;
         }
 
-        // Sauvegarder le nom dans le stockage local et la session
+        // Sauvegarder les données
         this.saveReservationData(name);
 
         // Afficher un message de succès
@@ -51,9 +102,14 @@ class ReservationManager {
         }, 2000);
     }
 
-    // Valider le nom
+    // Valider le nom selon le type (validation simplifiée)
     validateName(name) {
-        return name && name.length >= 2;
+        // Validation de base pour tous les types
+        if (!name || name.length < 2) return false;
+
+        // Pour tous les types, accepter tout format de nom
+        // On ne vérifie plus la présence de "&" ou "et"
+        return true;
     }
 
     // Sauvegarder les données de réservation
@@ -61,17 +117,32 @@ class ReservationManager {
         try {
             const reservationData = {
                 nom: name,
+                type: this.reservationType,
                 date: new Date().toISOString(),
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                // Ajout d'un identifiant unique pour plus de fiabilité
+                reservationId: 'res_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
 
-            // Sauvegarder dans sessionStorage (pour la récupération immédiate)
+            console.log('📝 Données à sauvegarder:', reservationData);
+
+            // Sauvegarder dans sessionStorage (prioritaire)
             sessionStorage.setItem('reservationData', JSON.stringify(reservationData));
+            console.log('✅ Données sauvegardées dans sessionStorage');
 
             // Sauvegarder dans localStorage (pour persistance)
+            localStorage.setItem('reservationData', JSON.stringify(reservationData));
             localStorage.setItem('inviteName', name);
+            localStorage.setItem('reservationType', this.reservationType);
+            localStorage.setItem('reservationTimestamp', Date.now().toString());
 
-            console.log('📝 Données sauvegardées:', reservationData);
+            console.log('✅ Données sauvegardées dans localStorage');
+            console.log('📋 Contenu localStorage:', {
+                inviteName: localStorage.getItem('inviteName'),
+                reservationType: localStorage.getItem('reservationType'),
+                reservationData: localStorage.getItem('reservationData')
+            });
+
         } catch (error) {
             console.error('❌ Erreur lors de la sauvegarde:', error);
         }
@@ -101,13 +172,18 @@ class ReservationManager {
             errorDiv.style.display = 'none';
         }
 
+        // Message personnalisé selon le type
+        const successMessage = this.reservationType === 'couple'
+            ? `Merci ${name} pour votre réservation en couple !`
+            : `Merci ${name} !`;
+
         // Afficher le message de succès
         const successDiv = document.getElementById('success-message');
         if (successDiv) {
             successDiv.innerHTML = `
                 <div style="text-align: center; padding: 10px;">
                     <div style="font-size: 24px; margin-bottom: 10px;">🎉</div>
-                    <h3 style="color: #4CAF50; margin-bottom: 10px;">Merci ${name} !</h3>
+                    <h3 style="color: #4CAF50; margin-bottom: 10px;">${successMessage}</h3>
                     <p style="color: #333; margin-bottom: 5px;">
                         ${MESSAGES.SUCCESS}
                     </p>

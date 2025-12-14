@@ -34,6 +34,67 @@ main {
   backdrop-filter: blur(5px);
 }
 
+/* ===== OPTIONS DE RÉSERVATION ===== */
+.reservation-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.option-group {
+  flex: 1;
+}
+
+.option-group input[type="radio"] {
+  display: none;
+}
+
+.option-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(139, 0, 0, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  height: 100%;
+  font-family: "Georgia", "Palatino", "Book Antiqua", serif;
+  font-style: italic;
+}
+
+.option-label:hover {
+  border-color: var(--red-color);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(139, 0, 0, 0.15);
+}
+
+.option-group input[type="radio"]:checked + .option-label {
+  border-color: var(--champagne);
+  background-color: var(--red-color);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.2);
+  color: var(--champagne);
+}
+
+.option-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.option-text {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.option-group input[type="radio"]:checked + .option-label .option-text {
+  color: var(--champagne);
+}
+
 input,
 select {
   padding: 0.6rem 0.8rem;
@@ -105,6 +166,24 @@ label {
   letter-spacing: 0.3px;
   line-height: 1.3;
   display: block;
+}
+.Avertissement {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.Avertissement span {
+  font-weight: bold;
+  color: var(--red-color);
+}
+/* Styles pour le hint sous l'input */
+.hint {
+  display: block;
+  margin-top: 5px;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.3;
 }
 
 /* ===== SECTION PRÉFÉRENCES DE BOISSONS ===== */
@@ -453,12 +532,14 @@ small {
 input:focus,
 button:focus,
 select:focus,
-.boisson-item:focus {
+.boisson-item:focus,
+.option-label:focus {
   outline: 2px solid var(--red-color);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
-.boisson-item {
+.boisson-item,
+.option-label {
   -webkit-tap-highlight-color: rgba(139, 0, 0, 0.1);
 }
 
@@ -477,6 +558,24 @@ select:focus,
     padding: 1.5rem;
     max-width: 450px;
     margin: 0 auto;
+  }
+
+  .reservation-options {
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .option-label {
+    padding: 20px 15px;
+  }
+
+  .option-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .option-text {
+    font-size: 1rem;
   }
 
   .boissons-grid {
@@ -537,6 +636,11 @@ select:focus,
     border-radius: 8px;
   }
 
+  .reservation-options {
+    gap: 25px;
+    margin-bottom: 30px;
+  }
+
   .boissons-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.8rem;
@@ -580,6 +684,31 @@ select:focus,
 
   button:hover {
     transform: translateY(-2px);
+  }
+}
+
+/* ===== RESPONSIVE POUR LES OPTIONS (MOBILE) ===== */
+@media (max-width: 480px) {
+  .reservation-options {
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .option-label {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .option-icon {
+    font-size: 22px;
+    margin-bottom: 0;
+  }
+
+  .option-text {
+    font-size: 0.9rem;
   }
 }
 
@@ -659,6 +788,10 @@ select:focus,
     font-size: 0.9rem;
     padding: 0.75rem 1rem;
   }
+
+  .hint {
+    font-size: 0.8rem;
+  }
 }
 
 /* Support pour les très petits écrans */
@@ -686,7 +819,21 @@ select:focus,
   button {
     font-size: 0.9rem;
   }
+
+  .reservation-options {
+    gap: 8px;
+  }
+
+  .option-label {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .option-icon {
+    font-size: 20px;
+  }
 }
+
 /* ===== COMPTEUR DE SÉLECTION ===== */
 .selection-counter {
   display: inline-block;
